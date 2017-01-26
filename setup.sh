@@ -4,7 +4,7 @@
 
 # ensure pwd is the cloned repository
 result=${PWD##*/}
-if [ "$result" != "rumen_microbiome_feed_efficiency_beef" ]
+if [ "$result" != "RumenMicrobiome_FeedEfficiency_Beef" ]
 then
 	printf "\nCurrent directory is not the cloned repository.\nSee https://github.com/enriquepaz/rumen_microbiome_feed_efficiency_beef for details.\n\n"
 	exit 1
@@ -18,12 +18,12 @@ fi
 
 # anaconda 
 wget https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda-2.3.0-Linux-x86_64.sh
-bash Anaconda-2.3.0-Linux-x86_64.sh
+bash Anaconda*.sh
 anaconda/bin/conda create -n microbiomeBeef python=2.7 qiime=1.9.1
 source anaconda/bin/activate microbiomeBeef
 
 # r
-conda install -c r rpy2=2.5.6 r-devtools=1.9.1 r-curl=0.9.4 r-XML r-car 
+conda install -c r rpy2=2.5.6 r-devtools=1.9.1 r-curl=0.9.4 
 conda install -c r r=3.2.2
 
 # pandoc

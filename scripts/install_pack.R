@@ -20,7 +20,7 @@ ipak <- function(pkg){
 packages <- c("rmarkdown", "knitr", "ggplot2", "matrixStats", "plyr", "tidyr", "biom", 
               "gplots", "RColorBrewer", "vegan", "mvtnorm", "modeltools", "coin", "agricolae", "gam", 
               "gamlss", "gbm", "glmnet", "inlinedocs", "logging", "MASS", "nlme", "optparse", 
-              "outliers", "penalized", "pscl", "robustbase")
+              "outliers", "penalized", "pscl", "robustbase", "car", "XML")
 ipak(packages)
 
 devtools::install_github("gavinsimpson/ggvegan")
