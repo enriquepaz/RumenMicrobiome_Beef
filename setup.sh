@@ -42,7 +42,7 @@ unzip Mothur.linux_64.zip
 mv mothur/mothur anaconda2/envs/microbiomeBeef/bin/
 rm -r mothur
 rm -r __MACOSX
-rm -r Mothur.mac_64.OSX-10.9.zip
+rm -r Mothur.linux_64.zip
 
 # usearch
 wget -O anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 $1
