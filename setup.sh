@@ -10,7 +10,8 @@ then
 fi
 
 # ensure provided link to usearch download
-if [ "$1" = "" ]; then
+if [ "$1" = "" ]
+then
     printf "\nProvide a link for USEARCH download (from email) as argument.\nGet a license from http://www.drive5.com/usearch/download.html\nSee https://github.com/enriquepaz/rumen_microbiome_feed_efficiency_beef for details.\n\n"
     exit 1
 fi
