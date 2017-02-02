@@ -21,9 +21,9 @@ cd ..
 wget https://repo.continuum.io/archive/Anaconda2-4.3.0-Linux-x86_64.sh
 bash Anaconda2-4.3.0-Linux-x86_64.sh
 anaconda2/bin/conda create -n microbiomeBeef python=2.7
-source anaconda2/bin/activate microbiomeBeef
-pip install --upgrade setuptools
-pip install https://github.com/biocore/qiime/archive/1.9.1.tar.gz
+source anaconda2/bin/activate microbiomeBeef qiime=1.9.1
+#pip install --upgrade setuptools
+#pip install https://github.com/biocore/qiime/archive/1.9.1.tar.gz
 rm Anaconda2-4.3.0-Linux-x86_64.sh
 
 # r
