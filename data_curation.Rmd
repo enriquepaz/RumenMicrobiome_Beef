@@ -8,7 +8,7 @@ The following obtains the raw sequences from the Sequence Read Archive (SRA) and
 
 Demultiplexing was done automatically using the onboard PC of the Miseq instrument and sequences represent only biological data (i.e. do not contain adapters or primers sequences). 
 
-After retrieving and renaming the data, the raw files will be located in the fastq_files directory within the rendered_Rmds directory.
+After retrieving and renaming the data, the raw files will be located in the fastq_files directory.
 
 ```{r, engine='bash', results='hide'}
 #download raw sequences from SRA
@@ -35,7 +35,6 @@ do
     done
 done < sra_to_samples.txt
 
-mkdir rendered_Rmds
-mkdir rendered_Rmds/fastq_files
-mv *.fastq rendered_Rmds/fastq_files
+mkdir fastq_files
+mv *.fastq fastq_files
 ```

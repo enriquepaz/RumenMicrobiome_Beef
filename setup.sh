@@ -17,7 +17,6 @@ then
 fi
 
 # anaconda 
-cd ..
 wget https://repo.continuum.io/archive/Anaconda2-4.3.0-Linux-x86_64.sh
 bash Anaconda2-4.3.0-Linux-x86_64.sh
 anaconda2/bin/conda create -n microbiomeBeef python=2.7 pip numpy matplotlib=1.4.3 scipy pandas cython mock nose
@@ -31,7 +30,7 @@ conda install -c r r=3.2.2
 
 # R packages
 printf "\nInstallation of R packages will take some time, be patient. No interaction needed.\n\n"
-R CMD BATCH RumenMicrobiome_Beef/scripts/install_pack.R
+R CMD BATCH scripts/install_pack.R
 rm install_pack.Rout
 
 # pandoc
