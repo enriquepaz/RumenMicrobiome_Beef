@@ -53,4 +53,3 @@ print "\nOutputs:\nfileList.paired.txt\nfileList.single.txt\n"
 
 paired_out.close()
 single_out.close()
-
