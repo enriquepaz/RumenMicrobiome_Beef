@@ -1,0 +1,48 @@
+---
+title: "generate_OTU_table"
+output: html_document
+---
+
+```{r, engine='bash', results='hide'}
+#Create input file for make.contigs 
+scripts/make_file.py -d fastq_files/
+```
+
+```{r, engine='bash', results='asis'}  
+#Default parameters
+mothur "#make.contigs(file=fileList.paired.txt, processors=8)"
+
+#Check the summary of the sequences quality
+mothur "#summary.seqs(fasta=$WORK/feed_efficiency/fileList.paired.trim.contigs.fasta, processors=8)"
+
+#Filter out sequences with ambiguous bases and outside window length 
+mothur "#screen.seqs(fasta=fileList.paired.trim.contigs.fasta, maxambig=0, minlength=245, maxlength=275, processors=8)"
+```
+
+```{r, engine='bash', results='hide'} 
+#Create new fasta files with a header line format compatible with the UPARSE pipeline
+python scripts/uparse_format.py -f fileList.paired.trim.contigs.good.fasta -g fileList.paired.contigs.groups
+```
+
+```{r, engine='bash', results='hide'}
+#Find set of unique sequences
+anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -derep_fulllength contigs_for_uparse.fasta -sizeout -output derep.fa
+
+#Sort sequences by decreasing size annotation (cluster size) not including singletons
+anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -sortbysize derep.fa -minsize 2 -output derep.sort.fa
+
+#Generate fasta file containing OTU representative sequences
+anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -cluster_otus derep.sort.fa -otus otus1.fa
+
+#Chimera detection
+anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -uchime_ref otus1.fa -db gold.fasta -strand plus -nonchimeras otus1.nonchimera.fa
+
+#Change header line format
+python scripts/fasta_number.py otus1.nonchimera.fa > otus2.fa
+
+#Generate UCLUST-format tabbed text with global hits
+anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -usearch_global contigs_for_uparse.fasta -db otus2.fa -strand plus -id 0.97 -uc otu_map.uc
+
+#Generate OTU table
+python scripts/uc2otutab.py otu_map.uc > otu_table.txt
+```

@@ -16,7 +16,7 @@ wget --quiet -r --no-parent ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/B
 mv ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP098/SRP098921/*/*.sra ./
 rm -rf ftp-trace.ncbi.nih.gov/
 
-#dump fastq files sra files
+#dump fastq files from sra files
 for sra in *.sra
 do
   sratoolkit.2.8.1-2-centos_linux64/bin/fastq-dump --split-3 "$sra" &
