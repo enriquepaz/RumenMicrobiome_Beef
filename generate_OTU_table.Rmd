@@ -14,7 +14,9 @@ scripts/make_file.py -d fastq_files/
 ```{r, engine='bash'}  
 #Default parameters
 mothur "#make.contigs(file=fileList.paired.txt, processors=8)"
+```
 
+```{r, engine='bash'}  
 #Check the summary of the sequences quality
 mothur "#summary.seqs(fasta=fileList.paired.trim.contigs.fasta, processors=8)"
 
