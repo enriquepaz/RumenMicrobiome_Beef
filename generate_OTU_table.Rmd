@@ -11,7 +11,7 @@ The following assembles and quality filters contigs. Quality filtering includes 
 scripts/make_file.py -d fastq_files/
 ```
 
-```{r, engine='bash', results='asis'}  
+```{r, engine='bash'}  
 #Default parameters
 mothur "#make.contigs(file=fileList.paired.txt, processors=8)"
 
@@ -28,7 +28,7 @@ mothur "#screen.seqs(fasta=fileList.paired.trim.contigs.fasta, maxambig=0, minle
 python scripts/uparse_format.py -f fileList.paired.trim.contigs.good.fasta -g fileList.paired.contigs.groups
 ```
 
-```{r, engine='bash', results='asis'}
+```{r, engine='bash'}
 #Establish permissions for the uparse_python_scripts folder
 chmod -R 775 scripts/uparse_python_scripts/
 
