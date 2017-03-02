@@ -1,5 +1,5 @@
 ---
-title: "data_curation"
+title: "Data Curation"
 output: html_document
 ---
 
