@@ -1,0 +1,39 @@
+---
+title: "Data Curation"
+output: html_document
+---
+
+The following obtains the raw sequences from the Sequence Read Archive (SRA) and renames the fastq files. The file sra_to_samples.txt has the accession numbers (after fastq-dump) and identifiers of the paired reads from each sample. The identifiers are in the same format obtained from the Illumina Miseq sequencer: \<SampleName>_S\<SampleNumber>_L001_R\<ReadNumber>_001.fastq and were the ones used in the study. The mapping_file.txt associates the sample ID to the metadata.
+
+Demultiplexing was done automatically using the onboard PC of the Miseq instrument and sequences represent only biological data (i.e. do not contain adapters or primers sequences). 
+
+After retrieving and renaming the fastq files, the raw files will be located in the fastq_files directory.
+
+```{r, engine='bash', results='hide'}
+#download raw sequences from SRA
+wget --quiet -r --no-parent ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP100/SRP100776/
+mv ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP100/SRP100776/*/*.sra ./
+rm -rf ftp-trace.ncbi.nih.gov/
+
+#Convert SRA data into fastq format
+for sra in *.sra
+do
+  sratoolkit.2.8.1-3-centos_linux64/bin/fastq-dump --split-3 "$sra" &
+done
+wait
+
+rm -f *.sra
+
+#Rename files from SRA format to Illumina Miseq format
+while read sra new
+do
+    for srafile in $sra*
+    do
+        newfile="$new"
+        mv "$srafile" "$newfile" 
+    done
+done < sra_to_samples.txt
+
+mkdir fastq_files
+mv *.fastq fastq_files
+```
