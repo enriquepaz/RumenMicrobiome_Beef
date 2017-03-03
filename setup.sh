@@ -37,16 +37,11 @@ rm install_pack.Rout
 conda install -c https://conda.binstar.org/asmeurer pandoc
 
 # mothur
-wget https://github.com/mothur/mothur/releases/download/v1.39.0/Mothur.linux_64.zip
-unzip Mothur.linux_64.zip
-mv mothur/mothur anaconda2/envs/microbiomeBeef/bin/
-rm -r mothur
-rm -r __MACOSX
-rm -r Mothur.linux_64.zip
+conda install -c biobuilds mothur=1.38.1
 
 # usearch
-wget -O anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 $1
-chmod 775 anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090
+#wget -O anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 $1
+#chmod 775 anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090
 
 #sra 
 wget ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-centos_linux64.tar.gz
