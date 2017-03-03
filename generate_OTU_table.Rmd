@@ -11,13 +11,12 @@ The following assembles and quality filters contigs. Quality filtering includes 
 scripts/make_file.py -d fastq_files/
 ```
 
+Note: 8 processors were used to run [mothur](https://www.mothur.org/wiki/Main_Page).
 ```{r, engine='bash'}  
 #Default parameters
 mothur "#make.contigs(file=fileList.paired.txt, processors=8)"
-```
 
-```{r, engine='bash'}  
-#Check the summary of the sequences quality
+#Obtain summary of sequences quality
 mothur "#summary.seqs(fasta=fileList.paired.trim.contigs.fasta, processors=8)"
 
 #Filter out sequences with ambiguous bases and outside window length 
@@ -35,25 +34,25 @@ python scripts/uparse_format.py -f fileList.paired.trim.contigs.good.fasta -g fi
 chmod -R 775 scripts/uparse_python_scripts/
 
 #Find set of unique sequences
-$anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -derep_fulllength contigs_for_uparse.fasta -sizeout -output derep.fa
+anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -derep_fulllength contigs_for_uparse.fasta -sizeout -output derep.fa
 
 #Sort sequences by decreasing size annotation (cluster size) not including singletons
-$anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -sortbysize derep.fa -minsize 2 -output derep.sort.fa
+anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -sortbysize derep.fa -minsize 2 -output derep.sort.fa
 
 #Generate fasta file containing OTU representative sequences
-$anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -cluster_otus derep.sort.fa -otus otus1.fa
+anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -cluster_otus derep.sort.fa -otus otus1.fa
 
 #Decompress gold.fasta.gz
 gzip -d gold.fasta.gz
 
 #Chimera detection
-$anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -uchime_ref otus1.fa -db gold.fasta -strand plus -nonchimeras otus1.nonchimera.fa
+anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -uchime_ref otus1.fa -db gold.fasta -strand plus -nonchimeras otus1.nonchimera.fa
 
 #Change header line format
 python scripts/uparse_python_scripts/fasta_number.py otus1.nonchimera.fa > otus2.fa
 
 #Map reads to OTUs at 97% identity threshold and generate UCLUST-format tabbed text
-$anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -usearch_global contigs_for_uparse.fasta -db otus2.fa -strand plus -id 0.97 -uc otu_map.uc
+anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 -usearch_global contigs_for_uparse.fasta -db otus2.fa -strand plus -id 0.97 -uc otu_map.uc
 
 #Generate OTU table
 python scripts/uparse_python_scripts/uc2otutab.py otu_map.uc > otu_table.txt
