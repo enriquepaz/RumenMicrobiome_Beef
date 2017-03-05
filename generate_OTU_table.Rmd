@@ -6,6 +6,7 @@ output: html_document
 The following assembles and quality filters contigs. Quality filtering includes the removal of sequences with ambiguous bases, incorrect length, or improper assemble. Then, the [UPARSE](http://www.drive5.com/uparse/) pipeline is used to generate an OTU table with OTUs clustered at 97% identity threshold.
 
 ##Assemble Contigs
+
 ```{r, engine='bash', results='hide'}
 #Create input file for make.contigs 
 scripts/make_file.py -d fastq_files/
