@@ -5,7 +5,7 @@ output: html_document
 
 ##Assign taxonomy to OTUs
 
-```{r, engine='bash'}
+```{r, engine='bash', results='hide'}
 tar -xzf gg_13_8.gz
 ```
 
@@ -41,7 +41,7 @@ wget http://www.mothur.org/w/images/b/be/Silva.nr_v123.tgz -P silva
 tar -zxvf silva/Silva.nr_v123.tgz -C silva
 
 #Customize reference database to V4 region
-mothur "#pcr.seqs(fasta=silva/silva.nr_v123.align, start=11894, end=25319, keepdots=F, processors=4)"
+mothur "#pcr.seqs(fasta=silva/silva.nr_v123.align, start=11894, end=25319, keepdots=F, processors=8)"
 
 #Check for outliers
 mothur "#summary.seqs(fasta=silva/silva.nr_v123.pcr.align, processors=8)"
@@ -57,7 +57,7 @@ mothur "#system(mv silva/silva.nr_v123.pcr.good.align silva/silva.v4.fasta)"
 
 ```{r, engine='bash'}
 #Align sequences
-mothur "#align.seqs(fasta=usearch_results/otus2.fasta, reference=silva/silva.v4.fasta)"
+mothur "#align.seqs(fasta=usearch_results/otus2.fa, reference=silva/silva.v4.fasta)"
 
 #Summarize quality of alignment
 mothur "#summary.seqs(fasta=usearch_results/otus2.align)"
