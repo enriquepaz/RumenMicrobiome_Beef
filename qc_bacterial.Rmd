@@ -47,7 +47,7 @@ mothur "#pcr.seqs(fasta=silva/silva.nr_v123.align, start=11894, end=25319, keepd
 mothur "#summary.seqs(fasta=silva/silva.nr_v123.pcr.align, processors=8)"
 
 #Remove outliers
-mothur "#screen.seqs(fasta=silva/silva.nr_v123.pcr.align, summary=silva/silva.nr_v123.pcr.summary, start=1, end=13425)"
+mothur "#screen.seqs(fasta=silva/silva.nr_v123.pcr.align, summary=silva/silva.nr_v123.pcr.summary, start=1, end=13425, processors=8)"
 
 #Rename customized reference alignment 
 mothur "#system(mv silva/silva.nr_v123.pcr.good.align silva/silva.v4.fasta)"
@@ -57,10 +57,10 @@ mothur "#system(mv silva/silva.nr_v123.pcr.good.align silva/silva.v4.fasta)"
 
 ```{r, engine='bash'}
 #Align sequences
-mothur "#align.seqs(fasta=usearch_results/otus2.fa, reference=silva/silva.v4.fasta)"
+mothur "#align.seqs(fasta=usearch_outputs/otus2.fa, reference=silva/silva.v4.fasta, processors=8)"
 
 #Summarize quality of alignment
-mothur "#summary.seqs(fasta=usearch_results/otus2.align)"
+mothur "#summary.seqs(fasta=usearch_outputs/otus2.align, processors=8)"
 ```
 
 ##Quality control of OTUs
@@ -70,7 +70,7 @@ Make a file containing all OTUs that aligned properly
 ```{r}
 dir.create("filter_files")
 
-otus_aligned <- read.table("usearch_results/otus2.summary", header = T, sep = "\t", stringsAsFactors = F)
+otus_aligned <- read.table("usearch_outputs/otus2.summary", header = T, sep = "\t", stringsAsFactors = F)
 
 otus_correct_aligned <- subset(otus_aligned, start >= 1960 & end == 11550)
 
