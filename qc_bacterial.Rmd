@@ -62,8 +62,6 @@ mothur "#align.seqs(fasta=usearch_outputs/otus2.fa, reference=silva/silva.v4.fas
 
 #Summarize quality of alignment
 mothur "#summary.seqs(fasta=usearch_outputs/otus2.align, processors=8)"
-
-mkdir filter_files
 ```
 
 ##Quality control of OTUs
@@ -71,6 +69,8 @@ mkdir filter_files
 Make a file containing all OTUs that aligned properly
 
 ```{r}
+dir.create("filter_files")
+
 otus_aligned <- read.table("usearch_outputs/otus2.summary", header = T, sep = "\t", stringsAsFactors = F)
 
 otus_correct_aligned <- subset(otus_aligned, start >= 1960 & end == 11550)
