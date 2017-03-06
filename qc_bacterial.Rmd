@@ -6,7 +6,8 @@ output: html_document
 ##Assign taxonomy to OTUs
 
 ```{r, engine='bash', results='hide'}
-tar -xzf gg_13_8.gz
+#Decompress Greengenes database: gg_13_8_otus
+tar -xzvf gg_13_8.gz
 ```
 
 ```{r, engine='bash'}
@@ -61,6 +62,8 @@ mothur "#align.seqs(fasta=usearch_outputs/otus2.fa, reference=silva/silva.v4.fas
 
 #Summarize quality of alignment
 mothur "#summary.seqs(fasta=usearch_outputs/otus2.align, processors=8)"
+
+mkdir filter_files
 ```
 
 ##Quality control of OTUs
@@ -68,8 +71,6 @@ mothur "#summary.seqs(fasta=usearch_outputs/otus2.align, processors=8)"
 Make a file containing all OTUs that aligned properly
 
 ```{r}
-dir.create("filter_files")
-
 otus_aligned <- read.table("usearch_outputs/otus2.summary", header = T, sep = "\t", stringsAsFactors = F)
 
 otus_correct_aligned <- subset(otus_aligned, start >= 1960 & end == 11550)
