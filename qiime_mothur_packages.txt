@@ -26,7 +26,6 @@ gsl=2.2.1=0
 h5py=2.6.0=np110py27_1
 hdf5=1.8.16=0
 icu=58.1=1
-ipython=5.1.0=py27_1
 ipython_genutils=0.1.0=py27_0
 jbig=2.1=0
 jpeg=9b=0
