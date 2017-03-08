@@ -9,41 +9,17 @@ then
 	exit 1
 fi
 
-# ensure provided link to usearch download
-if [ "$1" = "" ]
-then
-    printf "\nProvide a link for USEARCH download (from email) as argument.\nGet a license from http://www.drive5.com/usearch/download.html\nSee https://github.com/enriquepaz/rumen_microbiome_feed_efficiency_beef for details.\n\n"
-    exit 1
-fi
+# Miniconda 
+wget https://repo.continuum.io/miniconda/Miniconda2-4.3.11-Linux-x86_64.sh
+bash Miniconda2-4.3.11-Linux-x86_64.sh -b -p anaconda
+rm Miniconda2-4.3.11-Linux-x86_64.sh
 
-# anaconda 
-wget https://repo.continuum.io/archive/Anaconda2-4.3.0-Linux-x86_64.sh
-bash Anaconda2-4.3.0-Linux-x86_64.sh
-anaconda2/bin/conda create -n microbiomeBeef python=2.7 pip numpy matplotlib=2.0.0 scipy pandas cython mock nose
-source anaconda2/bin/activate microbiomeBeef 
-pip install https://github.com/biocore/qiime/archive/1.9.1.tar.gz
-rm Anaconda2-4.3.0-Linux-x86_64.sh
-
-# R
-conda install -c r rpy2=2.5.6 r-devtools=1.9.1 r-curl=0.9.4 
-conda install -c r r=3.2.2
-
-# R packages
-printf "\nInstallation of R packages will take some time, be patient. No interaction needed.\n\n"
-R CMD BATCH scripts/install_pack.R
-rm install_pack.Rout
-
-# pandoc
-conda install -c https://conda.binstar.org/asmeurer pandoc
-
-# mothur
-conda install -c biobuilds mothur=1.38.1
-
-# usearch
-#wget -O anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090 $1
-#chmod 775 anaconda2/envs/microbiomeBeef/bin/usearch7.0.1090
+#Create environments
+anaconda/bin/conda create -y -n qiimemothur --file qiime_mothur_packages.txt -c bioconda -c r -c biobuilds
+anaconda/bin/conda create -y -n r --file r_packages.txt -c bioconda -c r -c biobuilds
+source anaconda/bin/activate qiimemothur
 
 #sra 
-wget ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-centos_linux64.tar.gz
-tar -xzf sratoolkit.current-centos_linux64.tar.gz
-rm sratoolkit.current-centos_linux64.tar.gz
+wget ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.2.8.1-3-centos_linux64.tar.gz
+tar -xzf sratoolkit.2.8.1-3-centos_linux64.tar.gz
+rm sratoolkit.2.8.1-3-centos_linux64.tar.gz
