@@ -36,7 +36,6 @@ libiconv=1.14=0
 libpng=1.6.17=0
 libtiff=4.0.6=3
 libxml2=2.9.4=0
-matplotlib=1.4.3=np110py27_3
 mkl=11.3.3=0
 mock=2.0.0=py27_0
 mothur=1.38.1=0
