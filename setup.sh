@@ -20,6 +20,6 @@ anaconda/bin/conda create -y -n r --file r_packages.txt -c bioconda -c r -c biob
 source anaconda/bin/activate qiimemothur
 
 #sra 
-wget ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.2.8.1-3-centos_linux64.tar.gz
-tar -xzf sratoolkit.2.8.1-3-centos_linux64.tar.gz
-rm sratoolkit.2.8.1-3-centos_linux64.tar.gz
+wget ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-centos_linux64.tar.gz
+tar -xzf sratoolkit.current-centos_linux64.tar.gz
+rm sratoolkit.current-centos_linux64.tar.gz
