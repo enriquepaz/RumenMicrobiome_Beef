@@ -16,8 +16,14 @@ rm Miniconda2-4.3.11-Linux-x86_64.sh
 
 #Create environments
 anaconda/bin/conda create -y -n qiimemothur --file qiime_mothur_packages.txt -c bioconda -c r -c biobuilds
+#source anaconda/bin/activate qiimemothur
+#qiimemothur
+#appnope=0.1.0=py27_0 #conda install -c isuruf appnope=0.1.0.p0 
+#ipython 5.1.0 py27_1 #conda install -c anaconda ipython=5.3.0
+#conda install pandoc
 anaconda/bin/conda create -y -n r --file r_packages.txt -c bioconda -c r -c biobuilds
-source anaconda/bin/activate qiimemothur
+#source anaconda/bin/activate r
+#conda install pandoc
 
 #sra 
 wget ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-centos_linux64.tar.gz
