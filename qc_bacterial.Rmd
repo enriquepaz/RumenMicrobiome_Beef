@@ -5,14 +5,9 @@ output: html_document
 
 ##Assign taxonomy to OTUs
 
-```{r, engine='bash', results='hide'}
-#Decompress Greengenes database: gg_13_8_otus
-tar -xzvf gg_13_8.gz
-```
-
 ```{r, engine='bash'}
 #Assing taxonomy using Greengenes database (gg_13_8_otus) as reference sequences
-assign_taxonomy.py -i usearch_outputs/otus2.fa -t gg_13_8/97_otu_taxonomy.txt -r gg_13_8/97_otus.fasta -m mothur -o assigned_gg_taxa
+assign_taxonomy.py -i usearch_outputs/otus2.fa -t anaconda/envs/qiimemothur/lib/python2.7/site-packages/qiime_default_reference/gg_13_8_otus/taxonomy/97_otu_taxonomy.txt -r anaconda/envs/qiimemothur/lib/python2.7/site-packages/qiime_default_reference/gg_13_8_otus/rep_set/97_otus.fasta -m mothur -o assigned_gg_taxa
 ```
 
 ```{r, engine='bash'}
