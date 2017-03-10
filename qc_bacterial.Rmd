@@ -79,6 +79,6 @@ Remove OTUs with poor alignment, sinlgetons, and classified within the Archaea k
 #Filter out OTUs with poor alignment and singletons
 filter_otus_from_otu_table.py -i biom_files/otu_table_tax.biom -o biom_files/otu_table_tax_aligned.biom -e filter_files/otus_correct_aligned.txt --negate_ids_to_exclude -n 2
 
-##Filter out OTUs classified within the Archaea kingdom or Cyanobacteria phylum
+#Filter out OTUs classified within the Archaea kingdom or Cyanobacteria phylum
 filter_taxa_from_otu_table.py -i biom_files/otu_table_tax_aligned.biom -o biom_files/otu_table_final.biom -n k__Archaea,p__Cyanobacteria
 ```
