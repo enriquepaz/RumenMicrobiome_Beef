@@ -24,8 +24,10 @@ anaconda/bin/conda create -y -n qiimemothur --file qiime_mothur_packages.txt -c 
 anaconda/bin/conda create -y -n r --file r_packages.txt -c bioconda -c r -c biobuilds
 #source anaconda/bin/activate r
 #conda install pandoc
+#conda install -c bioconda r-vegan=2.3_4
 
 #sra 
 wget ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-centos_linux64.tar.gz
 tar -xzf sratoolkit.current-centos_linux64.tar.gz
 rm sratoolkit.current-centos_linux64.tar.gz
+

@@ -71,7 +71,7 @@ pdf("figures/FigureS1.pdf", height=6, width=6)
 pcoa_plot_full
 dev.off()
 ```
-![**Supplementary Figure S1** Principal coordinate analysis (PCoA) using the weighted UniFrac distance matrix displaying significant structuring of bacterial communities between cohorts.](figures/FigureS1.png)
+![PCoA](figures/FigureS1.png)
 
 #PERMANOVA
 
@@ -104,7 +104,7 @@ library(ggplot2)
 #Create data sets
 mapping_file <- read.table("r_inputs/mapping_file.txt", sep = "\t", header = T, stringsAsFactors = F)
 drops <- names(mapping_file) %in% c("Sample", "DNAPlate", "Tube", "Diet","Year", "DMI_total_kg", "days_fed", "gain_total", "FE", "Group")
-data_set <- mapping_set[!drops]
+data_set <- mapping_file[!drops]
 
 #Subset for cohort (heifer and steer)
 heifer_data <- subset(data_set, Sex == "Heifer")
@@ -132,7 +132,7 @@ steer_data <- subset(data_set, Sex == "Steer")
 #RS = Red Angus x Simmental
 #RO = Romosinuano
 
-#linear model average daily feed intaka (kg/d) for heifer cohort
+#linear model average daily feed intake (kg/d) for heifer cohort
 lm_ADFI_heifer <- lm(ADFI ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=heifer_data)
 
 summary(lm_ADFI_heifer)
@@ -149,7 +149,7 @@ summary(lm_ADG_heifer)
 ADG_res_heifer <- resid(lm_ADG_heifer) 
 
 #Residuals data set for heifer cohort
-heifer_data_sub <- heifer_data[,c("AnimalID", "Diet", "Selected")]
+heifer_data_sub <- heifer_data[,c("AnimalID", "Sex", "Selected")]
 residuals_df_heifer <- data.frame(ADFI_res_heifer, ADG_res_heifer)
 residuals_data_heifer <- data.frame(c(heifer_data_sub, residuals_df_heifer))
 
@@ -158,37 +158,37 @@ dir.create("residuals")
 
 write.table(residuals_data_heifer, file="residuals/residuals_data_heifer.txt", sep="\t", col.names=T, row.names=F)
 
-#linear model DMI for steer
-lm_ADFI_steer <- lm(ADFI_d_kg ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=steer_data)
+#linear model average daily feed intake (kg/d) for steer
+lm_ADFI_steer <- lm(ADFI ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=steer_data)
 
 summary(lm_ADFI_steer)
 
 #Extract residuals
-DMI_res_steer <- resid(lm_DMI_steer) 
+ADFI_res_steer <- resid(lm_ADFI_steer) 
 
-#linear model gain for steer
+#linear model average daily gain (kg/d) for steer
 lm_ADG_steer <- lm(ADG ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=steer_data)
 
 summary(lm_ADG_steer)
 
 #Extract residuals
-gain_res_steer <- resid(lm_ADG_steer) 
+ADG_res_steer <- resid(lm_ADG_steer) 
 
 #Residuals data set for steer
-steer_data_sub <- steer_data[,c("AnimalID", "Diet", "Selected")]
+steer_data_sub <- steer_data[,c("AnimalID", "Sex", "Selected")]
 residuals_df_steer <- data.frame(ADFI_res_steer, ADG_res_steer)
 residuals_data_steer <- data.frame(c(steer_data_sub, residuals_df_steer))
 
 write.table(residuals_data_steer, file="residuals/residuals_data_steer.txt", sep="\t", col.names=T, row.names=F)
 
 #Assess heifer and steer cohorts data for outliers
-data_long_heifer <- gather(residuals_data_heifer, measure, residual, DMI_res_heifer:gain_res_heifer)
-data_long_steer <- gather(residuals_data_steer, measure, residual, DMI_res_steer:gain_res_steer)
+data_long_heifer <- gather(residuals_data_heifer, measure, residual, ADFI_res_heifer:ADG_res_heifer)
+data_long_steer <- gather(residuals_data_steer, measure, residual, ADFI_res_steer:ADG_res_steer)
 
 #Generate boxplots
-boxplot_heifer <- ggplot(data_long_heifer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color ="#FF0000") + geom_jitter() + labs(title="Outliers Heifer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Dry Matter Intake", "Gain")) + theme(title=element_text(color="black", size=12, face="bold"), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
+boxplot_heifer <- ggplot(data_long_heifer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color ="#FF0000") + geom_jitter() + labs(title="Outliers Heifer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
 
-boxplot_steer <- ggplot(data_long_steer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color ="#FF0000") + geom_jitter() + labs(title="Outliers Steer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Dry Matter Intake", "Gain")) + theme(title=element_text(color="black", size=12, face="bold"), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
+boxplot_steer <- ggplot(data_long_steer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color ="#FF0000") + geom_jitter() + labs(title="Outliers Steer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
 
 multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
   library(grid)
@@ -211,9 +211,9 @@ multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
   }
 }
 
-png("figures/FigureS2.png", units="in", height=3, width=12, res=300)
-dev.off()
+png("figures/FigureS2.png", units="in", height=6, width=12, res=300)
 multiplot(boxplot_heifer, boxplot_steer, cols=2)
+dev.off()
 
 pdf("figures/FigureS2.pdf", height=6, width=12)
 multiplot(boxplot_heifer, boxplot_steer, cols=2)
@@ -227,44 +227,46 @@ residuals_data_steer <- residuals_data_steer[-c(105),]
 dir.create("quadrants")
 
 #Cartesian quadrants for heifer selection
-quadrant1_heifer <- subset(residuals_data_heifer, DMI_res_heifer > 0 & gain_res_heifer > 0) 
+quadrant1_heifer <- subset(residuals_data_heifer, ADFI_res_heifer > 0 & ADG_res_heifer > 0) 
 write.table(quadrant1_heifer, file="quadrants/quadrant1_heifer.txt", sep="\t", col.names=T, row.names=F)
 
-quadrant2_heifer <- subset(residuals_data_heifer, DMI_res_heifer < 0 & gain_res_heifer > 0)
+quadrant2_heifer <- subset(residuals_data_heifer, ADFI_res_heifer < 0 & ADG_res_heifer > 0)
 write.table(quadrant2_heifer, file="quadrants/quadrant2_heifer.txt", sep="\t", col.names=T, row.names=F)
 
-quadrant3_heifer <- subset(residuals_data_heifer, DMI_res_heifer < 0 & gain_res_heifer < 0)
+quadrant3_heifer <- subset(residuals_data_heifer, ADFI_res_heifer < 0 & ADG_res_heifer < 0)
 write.table(quadrant3_heifer, file="quadrants/quadrant3_heifer.txt", sep="\t", col.names=T, row.names=F)
 
-quadrant4_heifer <- subset(residuals_data_heifer, DMI_res_heifer > 0 & gain_res_heifer < 0)
+quadrant4_heifer <- subset(residuals_data_heifer, ADFI_res_heifer > 0 & ADG_res_heifer < 0)
 write.table(quadrant4_heifer, file="quadrants/quadrant4_heifer.txt", sep="\t",  col.names=T, row.names=F)
 
 #Cartesian quadrants for steer selection
-quadrant1_steer <- subset(residuals_data_steer, DMI_res_steer > 0 & gain_res_steer > 0) 
+quadrant1_steer <- subset(residuals_data_steer, ADFI_res_steer > 0 & ADG_res_steer > 0) 
 write.table(quadrant1_steer, file="quadrants/quadrant1_steer.txt", sep="\t", col.names=T, row.names=F)
 
-quadrant2_steer <- subset(residuals_data_steer, DMI_res_steer < 0 & gain_res_steer > 0)
+quadrant2_steer <- subset(residuals_data_steer, ADFI_res_steer < 0 & ADG_res_steer > 0)
 write.table(quadrant2_steer, file="quadrants/quadrant2_steer.txt", sep="\t", col.names=T, row.names=F)
 
-quadrant3_steer <- subset(residuals_data_steer, DMI_res_steer < 0 & gain_res_steer < 0)
+quadrant3_steer <- subset(residuals_data_steer, ADFI_res_steer < 0 & ADG_res_steer < 0)
 write.table(quadrant3_steer, file="quadrants/quadrant3_steer.txt", sep="\t", col.names=T, row.names=F)
 
-quadrant4_steer <- subset(residuals_data_steer, DMI_res_steer > 0 & gain_res_steer < 0)
+quadrant4_steer <- subset(residuals_data_steer, ADFI_res_steer > 0 & ADG_res_steer < 0)
 write.table(quadrant4_steer, file="quadrants/quadrant4_steer.txt", sep="\t", col.names=T, row.names=F)
 
 #Heifer feed efficiency phenotype plot
-heifer_plot <- ggplot(residuals_data_heifer, aes(x=ADFI_res_heifer, y=ADG_res_heifer, color=Selected)) + geom_point(size=2.5) + geom_hline(yintercept=0, linetype="dashed", color="black", size=1) + geom_vline(xintercept=0, linetype="dashed", color="black", size=1) + labs(title="Heifer Cohort", x="Average Daily Feed Intake Residuals (kg/d)", y="Average Daily Gain Residuals (kg/d)") + theme(title=element_text(color="black", size=12, face="bold"), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.position="none") + scale_color_manual(values=c("#000000", "#FF0000"))
+heifer_plot <- ggplot(residuals_data_heifer, aes(x=ADFI_res_heifer, y=ADG_res_heifer, color=Selected)) + geom_point(size=2.5) + geom_hline(yintercept=0, linetype="dashed", color="black", size=1) + geom_vline(xintercept=0, linetype="dashed", color="black", size=1) + labs(title="Heifer Cohort", x="Average Daily Feed Intake Residuals (kg/d)", y="Average Daily Gain Residuals (kg/d)") + theme(title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.position="none") + scale_color_manual(values=c("#000000", "#FF0000"))
 
 #Steer feed efficiency phenotype plot
-steer_plot <- ggplot(residuals_data_steer, aes(x=ADFI_res_steer, y=ADG_res_steer, color=Selected)) + geom_point(size=2.5) + geom_hline(yintercept=0, linetype="dashed", color="black", size=1) + geom_vline(xintercept=0, linetype="dashed", color="black", size=1) + labs(title="Steer Cohort", x="Average Daily Feed Intake Residuals (kg/d)", y="Average Daily Gain Residuals (kg/d)") + theme(title=element_text(color="black", size=12, face="bold"), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.position="none") + scale_color_manual(values = c("#000000", "#FF0000"))
+steer_plot <- ggplot(residuals_data_steer, aes(x=ADFI_res_steer, y=ADG_res_steer, color=Selected)) + geom_point(size=2.5) + geom_hline(yintercept=0, linetype="dashed", color="black", size=1) + geom_vline(xintercept=0, linetype="dashed", color="black", size=1) + labs(title="Steer Cohort", x="Average Daily Feed Intake Residuals (kg/d)", y="Average Daily Gain Residuals (kg/d)") + theme(title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.position="none") + scale_color_manual(values = c("#000000", "#FF0000"))
 
-png("figures/Figure1.png", units = "in", height = 3, width = 12, res = 300)
-multiplot(heifer_plot, steer_plot, cols = 2)
+png("figures/Figure1.png", units="in", height=6, width=12, res=300)
+multiplot(heifer_plot, steer_plot, cols=2)
 dev.off()
 
-pdf("figures/Figure1.pdf", height = 6, width = 12)
-multiplot(heifer_plot, steer_plot, cols = 2)
+pdf("figures/Figure1.pdf", height=6, width=12)
+multiplot(heifer_plot, steer_plot, cols=2)
 dev.off()
 ```
-![boxplot](figures/FigureS2.png)
-![feed efficiency phenotype](figures/Figure1.png)
+![Boxplot Outliers](figures/FigureS2.png)
+
+
+![Feed Efficiency Phenotype](figures/Figure1.png)
