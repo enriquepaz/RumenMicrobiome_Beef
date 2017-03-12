@@ -20,7 +20,7 @@ mothur "#clearcut(phylip=usearch_outputs/otus2.phylip.dist)"
 sed -i -e 's/AAAAAAAAAA//g' usearch_outputs/otus2.phylip.tre
 ```
 
-##Principal coordinate analysis (heifers vs steers)
+##Principal coordinate analysis between cohorts (heifer vs steer)
 
 ```{r, engine='bash'}
 #Summary table with samples sequence depth
@@ -186,9 +186,9 @@ data_long_heifer <- gather(residuals_data_heifer, measure, residual, ADFI_res_he
 data_long_steer <- gather(residuals_data_steer, measure, residual, ADFI_res_steer:ADG_res_steer)
 
 #Generate boxplots
-boxplot_heifer <- ggplot(data_long_heifer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color ="#FF0000") + geom_jitter() + labs(title="Outliers Heifer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
+boxplot_heifer <- ggplot(data_long_heifer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color ="#FF0000") + geom_jitter() + labs(title="Outliers Heifer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
 
-boxplot_steer <- ggplot(data_long_steer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color ="#FF0000") + geom_jitter() + labs(title="Outliers Steer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
+boxplot_steer <- ggplot(data_long_steer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color ="#FF0000") + geom_jitter() + labs(title="Outliers Steer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
 
 multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
   library(grid)
@@ -253,10 +253,10 @@ quadrant4_steer <- subset(residuals_data_steer, ADFI_res_steer > 0 & ADG_res_ste
 write.table(quadrant4_steer, file="quadrants/quadrant4_steer.txt", sep="\t", col.names=T, row.names=F)
 
 #Heifer feed efficiency phenotype plot
-heifer_plot <- ggplot(residuals_data_heifer, aes(x=ADFI_res_heifer, y=ADG_res_heifer, color=Selected)) + geom_point(size=2.5) + geom_hline(yintercept=0, linetype="dashed", color="black", size=1) + geom_vline(xintercept=0, linetype="dashed", color="black", size=1) + labs(title="Heifer Cohort", x="Average Daily Feed Intake Residuals (kg/d)", y="Average Daily Gain Residuals (kg/d)") + theme(title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.position="none") + scale_color_manual(values=c("#000000", "#FF0000"))
+heifer_plot <- ggplot(residuals_data_heifer, aes(x=ADFI_res_heifer, y=ADG_res_heifer, color=Selected)) + geom_point(size=2.5) + geom_hline(yintercept=0, linetype="dashed", color="black", size=1) + geom_vline(xintercept=0, linetype="dashed", color="black", size=1) + labs(title="Heifer Cohort", x="Average Daily Feed Intake Residuals (kg/d)", y="Average Daily Gain Residuals (kg/d)") + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.position="none") + scale_color_manual(values=c("#000000", "#FF0000"))
 
 #Steer feed efficiency phenotype plot
-steer_plot <- ggplot(residuals_data_steer, aes(x=ADFI_res_steer, y=ADG_res_steer, color=Selected)) + geom_point(size=2.5) + geom_hline(yintercept=0, linetype="dashed", color="black", size=1) + geom_vline(xintercept=0, linetype="dashed", color="black", size=1) + labs(title="Steer Cohort", x="Average Daily Feed Intake Residuals (kg/d)", y="Average Daily Gain Residuals (kg/d)") + theme(title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.position="none") + scale_color_manual(values = c("#000000", "#FF0000"))
+steer_plot <- ggplot(residuals_data_steer, aes(x=ADFI_res_steer, y=ADG_res_steer, color=Selected)) + geom_point(size=2.5) + geom_hline(yintercept=0, linetype="dashed", color="black", size=1) + geom_vline(xintercept=0, linetype="dashed", color="black", size=1) + labs(title="Steer Cohort", x="Average Daily Feed Intake Residuals (kg/d)", y="Average Daily Gain Residuals (kg/d)") + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.position="none") + scale_color_manual(values = c("#000000", "#FF0000"))
 
 png("figures/Figure1.png", units="in", height=6, width=12, res=300)
 multiplot(heifer_plot, steer_plot, cols=2)
@@ -268,5 +268,24 @@ dev.off()
 ```
 ![Boxplot Outliers](figures/FigureS2.png)
 
-
 ![Feed Efficiency Phenotype](figures/Figure1.png)
+
+```{r, engine='bash'}
+#Subset selected samples across feed efficiency phenotypes (Cartesian quadrants) to create mapping file for the discovery set 
+grep -E "#SampleID|Yes" mapping_files/mapping_file.txt > mapping_files/mapping_file_discovery.txt
+
+#Create file for filtering discovery set from OTU table
+printf "S241\nS254\nS256\nS272\nS281\nS288\nS295\nS303\nS308\nS313\nS346\nS347\nS357\nS380\nS382\nS485\nS486\nS497\nS510\nS512\nS518\nS524\nS525\nS527\nS562\nS567\nS673\nS680\nS694\nS712\nS713\nS715" > filter_files/samples_ids_selected.txt
+
+#Subset discovery OTU table
+filter_samples_from_otu_table.py -i biom_files/otu_table_final.biom -o biom_files/otu_table_discovery.biom --sample_id_fp filter_files/samples_ids_selected.txt
+
+#Split discovery OTU table by cohort (heifer and steer)
+split_otu_table.py -i biom_files/otu_table_discovery.biom -o split_by_sex -m mapping_files/mapping_file_discovery.txt -f Sex
+
+#Summarize heifer cohort discovery data
+biom summarize-table -i split_by_sex/otu_table_discovery__Sex_Heifer__.biom -o split_by_sex/otu_table_training_heifer_summary.txt
+
+#Summarize steer cohort discovery data
+biom summarize-table -i split_by_sex/otu_table_discovery__Sex_Steer__.biom -o split_by_sex/otu_table_discovery_steer_summary.txt
+```
