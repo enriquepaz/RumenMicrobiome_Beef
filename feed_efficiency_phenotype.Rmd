@@ -132,7 +132,7 @@ steer_data <- subset(data_set, Sex == "Steer")
 #RS = Red Angus x Simmental
 #RO = Romosinuano
 
-#linear model average daily feed intake (kg/d) for heifer cohort
+#Linear model average daily feed intake (kg/d) for heifer cohort
 lm_ADFI_heifer <- lm(ADFI ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=heifer_data)
 
 summary(lm_ADFI_heifer)
@@ -140,7 +140,7 @@ summary(lm_ADFI_heifer)
 #Extract residuals
 ADFI_res_heifer <- resid(lm_ADFI_heifer) 
 
-#linear model avarage daily gain (kg/d) for steer cohort
+#Linear model avarage daily gain (kg/d) for steer cohort
 lm_ADG_heifer <- lm(ADG ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=heifer_data)
 
 summary(lm_ADG_heifer)
@@ -158,7 +158,7 @@ dir.create("residuals")
 
 write.table(residuals_data_heifer, file="residuals/residuals_data_heifer.txt", sep="\t", col.names=T, row.names=F)
 
-#linear model average daily feed intake (kg/d) for steer
+#Linear model average daily feed intake (kg/d) for steer
 lm_ADFI_steer <- lm(ADFI ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=steer_data)
 
 summary(lm_ADFI_steer)
@@ -166,7 +166,7 @@ summary(lm_ADFI_steer)
 #Extract residuals
 ADFI_res_steer <- resid(lm_ADFI_steer) 
 
-#linear model average daily gain (kg/d) for steer
+#Linear model average daily gain (kg/d) for steer
 lm_ADG_steer <- lm(ADG ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=steer_data)
 
 summary(lm_ADG_steer)
