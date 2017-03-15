@@ -6,7 +6,7 @@ Output:
     keep_md: yes
 ---
 
-##Assign taxonomy to OTUs
+## Assign taxonomy to OTUs
 
 ```{r, engine='bash'}
 #Assing taxonomy using Greengenes database (gg_13_8_otus) as reference sequences
@@ -28,7 +28,7 @@ paste assigned_gg_taxa/otu_table.sort.txt <(cut -f 2 assigned_gg_taxa/otus2_tax_
 biom convert -i biom_files/otu_table_tax.txt -o biom_files/otu_table_tax.biom --to-json --table-type "OTU table" --process-obs-metadata taxonomy 
 ```
 
-##Customize Silva database to V4 region for sequences alignment
+## Customize Silva database to V4 region for sequences alignment
 
 ```{r, engine='bash'}
 #Create a folder to store Silva database
@@ -52,7 +52,7 @@ mothur "#screen.seqs(fasta=silva/silva.nr_v123.pcr.align, summary=silva/silva.nr
 mothur "#system(mv silva/silva.nr_v123.pcr.good.align silva/silva.v4.fasta)"
 ```
 
-##Align sequences
+## Align sequences
 
 ```{r, engine='bash'}
 #Align sequences
@@ -62,7 +62,7 @@ mothur "#align.seqs(fasta=usearch_outputs/otus2.fa, reference=silva/silva.v4.fas
 mothur "#summary.seqs(fasta=usearch_outputs/otus2.align, processors=8)"
 ```
 
-##Quality control of OTUs
+## Quality control of OTUs
 
 Make a file containing all OTUs that aligned properly
 
