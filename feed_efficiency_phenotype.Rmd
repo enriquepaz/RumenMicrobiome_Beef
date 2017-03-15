@@ -1,7 +1,7 @@
 ---
-Title: "Phylogenetic Tree, PCoA, PERMANOVA, Feed Efficiency Phenotype "
+Title: "Phylogenetic Tree, PCoA, PERMANOVA, Feed Efficiency Phenotype, Discovery Set"
 Author: Henry Paz (henry.paz@huskers.unl.edu)
-output: html_document
+Output: html_document
 ---
 
 ##Generate a phylogenetic tree 
@@ -26,7 +26,7 @@ sed -i -e 's/AAAAAAAAAA//g' usearch_outputs/otus2.phylip.tre
 #Summary table with samples sequence depth
 biom summarize-table -i biom_files/otu_table_final.biom -o biom_files/otu_table_final_summary.txt
 
-#Subsample OTU table to same sequence depth across samples
+#Rarefy OTU table to same sequence depth across samples
 single_rarefaction.py -i biom_files/otu_table_final.biom -o biom_files/otu_table_final_rarefied.biom -d 10000 
 
 #Create QIIME parameters file
@@ -186,9 +186,9 @@ data_long_heifer <- gather(residuals_data_heifer, measure, residual, ADFI_res_he
 data_long_steer <- gather(residuals_data_steer, measure, residual, ADFI_res_steer:ADG_res_steer)
 
 #Generate boxplots
-boxplot_heifer <- ggplot(data_long_heifer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color ="#FF0000") + geom_jitter() + labs(title="Outliers Heifer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
+boxplot_heifer <- ggplot(data_long_heifer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color="#FF0000") + geom_jitter() + labs(title="Outliers Heifer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
 
-boxplot_steer <- ggplot(data_long_steer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color ="#FF0000") + geom_jitter() + labs(title="Outliers Steer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
+boxplot_steer <- ggplot(data_long_steer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color="#FF0000") + geom_jitter() + labs(title="Outliers Steer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
 
 multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
   library(grid)
@@ -269,6 +269,8 @@ dev.off()
 ![Boxplot Outliers](figures/FigureS2.png)
 
 ![Feed Efficiency Phenotype](figures/Figure1.png)
+
+##Subset discovery set
 
 ```{r, engine='bash'}
 #Subset selected samples across feed efficiency phenotypes (Cartesian quadrants) to create mapping file for the discovery set 

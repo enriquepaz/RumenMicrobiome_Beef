@@ -1,5 +1,6 @@
 ---
-title: "Generate OTU Table"
+Title: "Assemble Contigs, Generate OTU Table"
+Author: Henry Paz (henry.paz@huskers.unl.edu)
 output: html_document
 ---
 
