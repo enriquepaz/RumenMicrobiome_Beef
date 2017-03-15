@@ -1,6 +1,9 @@
 ---
-title: "Assign taxonomy, customize alignment database, align sequences, and quality control"
-output: html_document
+Title: "Assign Taxonomy, Customize Alignment Database, Align Sequences, Quality Control"
+Author: Henry Paz (henry.paz@huskers.unl.edu)
+Output:
+  html_document:
+    keep_md: yes
 ---
 
 ##Assign taxonomy to OTUs
