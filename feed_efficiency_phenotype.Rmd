@@ -1,10 +1,12 @@
 ---
 Title: "Phylogenetic Tree, PCoA, PERMANOVA, Feed Efficiency Phenotype, Discovery Set"
 Author: Henry Paz (henry.paz@huskers.unl.edu)
-Output: html_document
+Output:
+  html_document:
+    keep_md: yes
 ---
 
-##Generate a phylogenetic tree 
+## Generate a phylogenetic tree 
 
 ```{r, engine='bash'}
 #Adjust ID lengths for clearcut command
@@ -20,7 +22,7 @@ mothur "#clearcut(phylip=usearch_outputs/otus2.phylip.dist)"
 sed -i -e 's/AAAAAAAAAA//g' usearch_outputs/otus2.phylip.tre
 ```
 
-##Principal coordinate analysis between cohorts (heifer vs steer)
+## Principal coordinate analysis between cohorts (heifer vs steer)
 
 ```{r, engine='bash'}
 #Summary table with samples sequence depth
@@ -40,7 +42,7 @@ mkdir r_inputs
 sed 's/#SampleID/Sample/g' mapping_files/mapping_file.txt > r_inputs/mapping_file.txt
 ```
 
-##PCoA plot
+## PCoA plot
 
 ```{r}
 #Load packages
@@ -73,7 +75,7 @@ dev.off()
 ```
 ![PCoA](figures/FigureS1.png)
 
-#PERMANOVA
+## PERMANOVA
 
 ```{r}
 #Load packages
@@ -94,7 +96,7 @@ dm_weighted_full <- as.dist(dm_weighted_full)
 adonis(dm_weighted_full ~ Sex, permutations=999, data=map_full)
 ```
 
-##Regression approach to determine feed efficiency phenotype within cohort (heifer and steer)
+## Regression approach to determine feed efficiency phenotype within cohort (heifer and steer)
 
 ```{r}
 #Load packages
@@ -270,7 +272,7 @@ dev.off()
 
 ![Feed Efficiency Phenotype](figures/Figure1.png)
 
-##Subset discovery set
+## Subset discovery set
 
 ```{r, engine='bash'}
 #Subset selected samples across feed efficiency phenotypes (Cartesian quadrants) to create mapping file for the discovery set 

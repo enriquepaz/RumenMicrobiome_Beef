@@ -6,7 +6,7 @@ Output: html_document
 
 The following assembles and quality filters contigs. Quality filtering includes the removal of sequences with ambiguous bases, incorrect length, or improper assemble. Then, the UPARSE pipeline is used to generate an OTU table with OTUs clustered at 97% identity threshold.
 
-##Calculate alpha diversity metrics
+## Calculate alpha diversity metrics
 
 ```{r, engine='bash'}
 #Rarefy heifer cohort discovery set to equal sequence depth
@@ -46,7 +46,7 @@ compare_alpha_diversity.py -i collated_even_alpha_steer/dominance.txt -o alpha_d
 compare_alpha_diversity.py -i collated_even_alpha_steer/goods_coverage.txt -o alpha_goods_steer -m split_by_sex/mapping_file_discovery__Sex_Steer__.txt -c Group -d 12430 -p fdr
 ```
 
-##Boxplots alpha metrics
+## Boxplots alpha metrics
 
 ```{r}
 #Load packages
