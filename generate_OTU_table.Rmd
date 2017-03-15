@@ -6,7 +6,7 @@ output: html_document
 
 The following assembles and quality filters contigs. Quality filtering includes the removal of sequences with ambiguous bases, incorrect length, or improper assemble. Then, the [UPARSE](http://www.drive5.com/uparse/) pipeline is used to generate an OTU table with OTUs clustered at 97% identity threshold.
 
-##Assemble Contigs
+## Assemble Contigs
 
 ```{r, engine='bash', results='hide'}
 #Create input file for make.contigs 
@@ -28,7 +28,7 @@ mothur "#screen.seqs(fasta=fileList.paired.trim.contigs.fasta, maxambig=0, minle
 python scripts/uparse_format.py -f fileList.paired.trim.contigs.good.fasta -g fileList.paired.contigs.groups
 ```
 
-##Generate OTU table
+## Generate OTU table
 
 The [USEARCH 64-bit version](http://drive5.com/usearch/buy64bit.html) was used as this dataset requires more than the 4Gb RAM allowed in the no-charge 32-bit version. Due to licensing obligations, USEARCH could not be included in the setup and the following steps to generate the OTU table are not reproducible. The custom and uparse python scripts, gold.fasta.gz, and usearch outputs required to continue analyses thorugh this pipeline are provided in the Github [repository](https://github.com/enriquepaz/RumenMicrobiome_Beef).   
 

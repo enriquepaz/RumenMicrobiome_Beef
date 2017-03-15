@@ -163,9 +163,10 @@ single_rarefaction.py -i split_by_sex/otu_table_discovery__Sex_Steer__.biom -d 1
 alpha_rarefaction.py -i biom_files/otu_table_discovery_rarefied_steer.biom -o alpha_rarefaction_plots_even_steer -m split_by_sex/mapping_file_discovery__Sex_Steer__.txt --min_rare_depth 1 -n 10 -p qiime_parameters.txt 
 ```
 
-#Alpha rarefaction plots
+## Alpha rarefaction plots
 
 ```{r}
+#Load packages
 library(XML)
 library(ggplot2)
 library(matrixStats)
