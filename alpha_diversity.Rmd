@@ -1,7 +1,9 @@
 ---
 Title: "Alpha Diversity Metrics"
 Author: Henry Paz (henry.paz@huskers.unl.edu)
-Output: html_document
+Output:
+  html_document:
+    keep_md: yes
 ---
 
 The following calculates alpha diversity metrics and generates alpha rarefaction plots within heifer and steer cohorts.
@@ -158,7 +160,7 @@ alpha_rarefaction.py -i biom_files/otu_table_discovery_rarefied_heifer.biom -o a
 single_rarefaction.py -i split_by_sex/otu_table_discovery__Sex_Steer__.biom -d 12430 -o biom_files/otu_table_discovery_rarefied_steer.biom
 
 #Alpha rarefaction plot for steer cohort
-alpha_rarefaction.py -i biom_files/otu_table_training_rarefied_steer.biom -o alpha_rarefaction_plots_even_steer -m split_by_sex/mapping_file_discovery__Sex_Steer__.txt --min_rare_depth 1 -n 10 -p qiime_parameters.txt 
+alpha_rarefaction.py -i biom_files/otu_table_discovery_rarefied_steer.biom -o alpha_rarefaction_plots_even_steer -m split_by_sex/mapping_file_discovery__Sex_Steer__.txt --min_rare_depth 1 -n 10 -p qiime_parameters.txt 
 ```
 
 #Alpha rarefaction plots
@@ -169,46 +171,45 @@ library(ggplot2)
 library(matrixStats)
 library(plyr)
 
-#rarefactions heifer
+#Rarefaction data set for heifer cohort
 rare_heifer <- readHTMLTable("alpha_rarefaction_plots_even_heifer/alpha_rarefaction_plots/rarefaction_plots.html", stringsAsFactors = F)
 rare_heifer$rare_data[rare_heifer$rare_data == "nan"] <- 0
 alpha_rare_heifer <- as.data.frame(rare_heifer$rare_data)
-alpha_rare_heifer <- alpha_rare_heifer[1:44,1:6]
+alpha_rare_heifer <- alpha_rare_heifer[1:44,1:4]
 colnames(alpha_rare_heifer)[2] <- "seqs.sample"
-colnames(alpha_rare_heifer)[3] <- "goods_coverage.ave"
-colnames(alpha_rare_heifer)[4] <- "goods_coverage.err"
-colnames(alpha_rare_heifer)[5] <- "observed_otus.ave"
-colnames(alpha_rare_heifer)[6] <- "observed_otus.err"
-#change to numeric variables
-cols.num <- c("seqs.sample", "goods_coverage.ave", "goods_coverage.err", "observed_otus.ave", "observed_otus.err")
+colnames(alpha_rare_heifer)[3] <- "observed_otus.ave"
+colnames(alpha_rare_heifer)[4] <- "observed_otus.err"
+
+#Change to numeric variables
+cols.num <- c("seqs.sample", "observed_otus.ave", "observed_otus.err")
 alpha_rare_heifer[cols.num] <- sapply(alpha_rare_heifer[cols.num],as.numeric)
-pd <- position_dodge(width = 275)
+pd <- position_dodge(width=275)
 
-heifer_observed_otus <- ggplot(alpha_rare_heifer, aes(x=seqs.sample, y=observed_otus.ave, color=Group, ymin=observed_otus.ave - observed_otus.err, ymax=observed_otus.ave + observed_otus.err)) + geom_line(position=pd, size=1) + geom_pointrange(position=pd) + labs(title="Heifer", x="Sequences per Sample", y = "Observed OTUs") + theme(title=element_text(color="black", size=12, face="bold"), axis.line.x=element_line(color = "black", size = 1), axis.line.y=element_line(color = "black", size = 1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.text=element_text(face="bold"), legend.title = element_blank()) + scale_colour_manual(values=c("#FF00FF", "#FF0000", "#000080", "#008000")) 
+#Rarefaction plot for heifer cohort
+heifer_observed_otus <- ggplot(alpha_rare_heifer, aes(x=seqs.sample, y=observed_otus.ave, color=Group, ymin=observed_otus.ave - observed_otus.err, ymax=observed_otus.ave + observed_otus.err)) + geom_line(position=pd, size=1) + geom_pointrange(position=pd) + labs(title="Heifer", x="Sequences per Sample", y = "Observed OTUs") + theme(plot.title=element_text(color="black", size=12, face="bold"), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.title = element_blank(), legend.text=element_text(face="bold")) + scale_colour_manual(values=c("#FF00FF", "#FF0000", "#000080", "#008000")) 
 
-#rarefactions steer
+#Rarefaction data set for steer cohort
 rare_steer <- readHTMLTable("alpha_rarefaction_plots_even_steer/alpha_rarefaction_plots/rarefaction_plots.html", stringsAsFactors = F)
 rare_steer$rare_data[rare_steer$rare_data == "nan"] <- 0
 alpha_rare_steer <- as.data.frame(rare_steer$rare_data)
-alpha_rare_steer <- alpha_rare_steer[1:44,1:6]
+alpha_rare_steer <- alpha_rare_steer[1:44,1:4]
 colnames(alpha_rare_steer)[2] <- "seqs.sample"
-colnames(alpha_rare_steer)[3] <- "goods_coverage.ave"
-colnames(alpha_rare_steer)[4] <- "goods_coverage.err"
-colnames(alpha_rare_steer)[5] <- "observed_otus.ave"
-colnames(alpha_rare_steer)[6] <- "observed_otus.err"
+colnames(alpha_rare_steer)[3] <- "observed_otus.ave"
+colnames(alpha_rare_steer)[4] <- "observed_otus.err"
 
-#change to numeric variables
-cols.num <- c("seqs.sample", "goods_coverage.ave", "goods_coverage.err", "observed_otus.ave", "observed_otus.err")
+#Change to numeric variables
+cols.num <- c("seqs.sample", "observed_otus.ave", "observed_otus.err")
 alpha_rare_steer[cols.num] <- sapply(alpha_rare_steer[cols.num],as.numeric)
-pd <- position_dodge(width = 275)
+pd <- position_dodge(width=275)
 
-steer_observed_otus <- ggplot(alpha_rare_steer, aes(x=seqs.sample, y=observed_otus.ave, color=Group, ymin=observed_otus.ave - observed_otus.err, ymax=observed_otus.ave + observed_otus.err)) + geom_line(position=pd, size=1) + geom_pointrange(position=pd) + labs(title="Steer", x="Sequences per Sample", y = "Observed OTUs") + theme(title=element_text(color="black", size=12, face="bold"), axis.line.x=element_line(color = "black", size = 1), axis.line.y=element_line(color = "black", size = 1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.text=element_text(face="bold"), legend.title = element_blank()) + scale_colour_manual(values=c("#FF00FF", "#FF0000", "#000080", "#008000")) 
+#Rarefaction plot for steer cohort
+steer_observed_otus <- ggplot(alpha_rare_steer, aes(x=seqs.sample, y=observed_otus.ave, color=Group, ymin=observed_otus.ave - observed_otus.err, ymax=observed_otus.ave + observed_otus.err)) + geom_line(position=pd, size=1) + geom_pointrange(position=pd) + labs(title="steer", x="Sequences per Sample", y = "Observed OTUs") + theme(plot.title=element_text(color="black", size=12, face="bold"), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.title = element_blank(), legend.text=element_text(face="bold")) + scale_colour_manual(values=c("#FF00FF", "#FF0000", "#000080", "#008000")) 
 
-png("figures/FigureS1.png", units = "in", height = 6, width = 12, res = 300)
+png("figures/FigureS4.png", units="in", height=6, width=12, res=300)
 multiplot(heifer_observed_otus, steer_observed_otus, cols=2)
 dev.off()
 
-pdf("figures/FigureS1.pdf", height = 6, width = 12)
+pdf("figures/FigureS4.pdf", height=6, width=12)
 multiplot(heifer_observed_otus, steer_observed_otus, cols=2)
 dev.off()
 ```
