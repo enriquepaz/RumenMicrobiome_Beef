@@ -82,7 +82,7 @@ heifer_observedotus <- ggplot(data_heifer_sub, aes(x=factor(Group), y=ObservedOT
 
 heifer_dominance <- ggplot(data_heifer_sub, aes(x=factor(Group), y=Dominance)) + geom_boxplot() + geom_jitter() + labs(title="", x="", y="Dominance") + theme(plot.title=element_blank(), axis.line.x=element_blank(), axis.line.y=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text.x=element_blank(), axis.text.y=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold")) + stat_summary(fun.y="mean", geom="point", shape=23, size=3, fill="black")
 
-heifer_shannon <- ggplot(data_heifer_sub, aes(x=factor(Group), y=Shannon)) + geom_boxplot() + geom_jitter() + labs(title="", x="Feed Efficiency Phenotype", y="Shannon") + theme(plot.title=element_blank(), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title = element_text(color="black", size=12, face="bold")) + stat_summary(fun.y="mean", geom="point", shape=23, size=3, fill="black")
+heifer_shannon <- ggplot(data_heifer_sub, aes(x=factor(Group), y=Shannon)) + geom_boxplot() + geom_jitter() + labs(title="", x="Feed Efficiency Phenotype", y="Shannon") + theme(plot.title=element_blank(), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold")) + stat_summary(fun.y="mean", geom="point", shape=23, size=3, fill="black")
 
 #Create data sets for steer cohort alpha metrics 
 alpha_observedotus_steer <- read.table("collated_even_alpha_steer/observed_otus.txt", sep="\t", header=T, stringsAsFactors=F)
@@ -107,12 +107,13 @@ data_steer_sub <- data_steer[,c(1,2,3,4,42)]
 colnames(data_steer_sub) <- c("Sample", "ObservedOTUs", "Shannon", "Dominance","Group")
 
 #Generate steer cohort alpha diversity metrics boxplots
-steer_observedotus <- ggplot(data_steer_sub, aes(x=factor(Group), y=ObservedOTUs)) + geom_boxplot() + geom_jitter() + labs(title="Steer", x="", y="Observed OTUs") + theme(plot.title=element_text(color="black", size=14, face="bold", hjust=0.5), axis.line.x=element_blank(), axis.line.y=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text.x=element_blank(), axis.text.y=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold")) + stat_summary(fun.y="mean", geom="point", shape=23, size=3, fill="black")
+steer_observedotus <- ggplot(data_steer_sub, aes(x=factor(Group), y=ObservedOTUs)) + geom_boxplot() + geom_jitter() + labs(title="Steer", x="", y="") + theme(plot.title=element_text(color="black", size=14, face="bold", hjust=0.5), axis.line.x=element_blank(), axis.line.y=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text.x=element_blank(), axis.text.y=element_text(color="black", size=12, face="bold"), axis.title=element_blank()) + stat_summary(fun.y="mean", geom="point", shape=23, size=3, fill="black")
 
-steer_dominance <- ggplot(data_steer_sub, aes(x=factor(Group), y=Dominance)) + geom_boxplot() + geom_jitter() + labs(title="", x="", y="Dominance") + theme(plot.title=element_blank(), axis.line.x=element_blank(), axis.line.y=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text.x=element_blank(), axis.text.y=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold")) + stat_summary(fun.y="mean", geom="point", shape=23, size=3, fill="black")
+steer_dominance <- ggplot(data_steer_sub, aes(x=factor(Group), y=Dominance)) + geom_boxplot() + geom_jitter() + labs(title="", x="", y="") + theme(plot.title=element_blank(), axis.line.x=element_blank(), axis.line.y=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text.x=element_blank(), axis.text.y=element_text(color="black", size=12, face="bold"), axis.title=element_blank()) + stat_summary(fun.y="mean", geom="point", shape=23, size=3, fill="black")
 
-steer_shannon <- ggplot(data_steer_sub, aes(x=factor(Group), y=Shannon)) + geom_boxplot() + geom_jitter() + labs(title="", x="Feed Efficiency Phenotype", y="Shannon") + theme(plot.title=element_blank(), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title = element_text(color="black", size=12, face="bold")) + stat_summary(fun.y="mean", geom="point", shape=23, size=3, fill="black")
+steer_shannon <- ggplot(data_steer_sub, aes(x=factor(Group), y=Shannon)) + geom_boxplot() + geom_jitter() + labs(title="", x="Feed Efficiency Phenotype", y="") + theme(plot.title=element_blank(), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title.x=element_text(color="black", size=12, face="bold"), axis.title.y=element_blank()) + stat_summary(fun.y="mean", geom="point", shape=23, size=3, fill="black")
 
+#Multiplot function
 multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
   library(grid)
   plots <- c(list(...), plotlist)
@@ -187,7 +188,7 @@ alpha_rare_heifer[cols.num] <- sapply(alpha_rare_heifer[cols.num],as.numeric)
 pd <- position_dodge(width=275)
 
 #Rarefaction plot for heifer cohort
-heifer_observed_otus <- ggplot(alpha_rare_heifer, aes(x=seqs.sample, y=observed_otus.ave, color=Group, ymin=observed_otus.ave - observed_otus.err, ymax=observed_otus.ave + observed_otus.err)) + geom_line(position=pd, size=1) + geom_pointrange(position=pd) + labs(title="Heifer", x="Sequences per Sample", y = "Observed OTUs") + theme(plot.title=element_text(color="black", size=12, face="bold"), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.title = element_blank(), legend.text=element_text(face="bold")) + scale_colour_manual(values=c("#FF00FF", "#FF0000", "#000080", "#008000")) 
+heifer_observed_otus <- ggplot(alpha_rare_heifer, aes(x=seqs.sample, y=observed_otus.ave, color=Group, ymin=observed_otus.ave - observed_otus.err, ymax=observed_otus.ave + observed_otus.err)) + geom_line(position=pd, size=1) + geom_pointrange(position=pd) + labs(title="Heifer", x="Sequences per Sample", y = "Observed OTUs") + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.title = element_blank(), legend.text=element_text(face="bold")) + scale_colour_manual(values=c("#FF00FF", "#FF0000", "#000080", "#008000")) 
 
 #Rarefaction data set for steer cohort
 rare_steer <- readHTMLTable("alpha_rarefaction_plots_even_steer/alpha_rarefaction_plots/rarefaction_plots.html", stringsAsFactors = F)
@@ -204,7 +205,7 @@ alpha_rare_steer[cols.num] <- sapply(alpha_rare_steer[cols.num],as.numeric)
 pd <- position_dodge(width=275)
 
 #Rarefaction plot for steer cohort
-steer_observed_otus <- ggplot(alpha_rare_steer, aes(x=seqs.sample, y=observed_otus.ave, color=Group, ymin=observed_otus.ave - observed_otus.err, ymax=observed_otus.ave + observed_otus.err)) + geom_line(position=pd, size=1) + geom_pointrange(position=pd) + labs(title="steer", x="Sequences per Sample", y = "Observed OTUs") + theme(plot.title=element_text(color="black", size=12, face="bold"), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.title = element_blank(), legend.text=element_text(face="bold")) + scale_colour_manual(values=c("#FF00FF", "#FF0000", "#000080", "#008000")) 
+steer_observed_otus <- ggplot(alpha_rare_steer, aes(x=seqs.sample, y=observed_otus.ave, color=Group, ymin=observed_otus.ave - observed_otus.err, ymax=observed_otus.ave + observed_otus.err)) + geom_line(position=pd, size=1) + geom_pointrange(position=pd) + labs(title="Steer", x="Sequences per Sample", y = "Observed OTUs") + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.title = element_blank(), legend.text=element_text(face="bold")) + scale_colour_manual(values=c("#FF00FF", "#FF0000", "#000080", "#008000")) 
 
 png("figures/FigureS4.png", units="in", height=6, width=12, res=300)
 multiplot(heifer_observed_otus, steer_observed_otus, cols=2)
@@ -214,3 +215,4 @@ pdf("figures/FigureS4.pdf", height=6, width=12)
 multiplot(heifer_observed_otus, steer_observed_otus, cols=2)
 dev.off()
 ```
+![Rarefaction Plots](figures/FigureS4.png)

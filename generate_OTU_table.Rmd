@@ -1,7 +1,9 @@
 ---
 Title: "Assemble Contigs, Generate OTU Table"
 Author: Henry Paz (henry.paz@huskers.unl.edu)
-output: html_document
+Output:
+  html_document:
+    keep_md: yes
 ---
 
 The following assembles and quality filters contigs. Quality filtering includes the removal of sequences with ambiguous bases, incorrect length, or improper assemble. Then, the [UPARSE](http://www.drive5.com/uparse/) pipeline is used to generate an OTU table with OTUs clustered at 97% identity threshold.

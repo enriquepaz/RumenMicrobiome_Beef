@@ -86,7 +86,7 @@ mapping_file <- read.table("r_inputs/mapping_file.txt", sep="\t", header=T, stri
 
 dm_weighted_full <- read.table("beta_div_full/weighted_unifrac_dm.txt", sep="\t", header=T)
 
-#Match order of method mapping file Sample with distance matirx Sample
+#Match order of mapping file sample IDs with distance matirx sample IDs
 map_full = mapping_file[match(dm_weighted_full$X, mapping_file$Sample), ]
 row.names(dm_weighted_full) <- dm_weighted_full$X
 dm_weighted_full <- dm_weighted_full[, -1]
@@ -192,6 +192,7 @@ boxplot_heifer <- ggplot(data_long_heifer, aes(x=measure, y=residual)) + geom_bo
 
 boxplot_steer <- ggplot(data_long_steer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color="#FF0000") + geom_jitter() + labs(title="Outliers Steer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
 
+#Multiplot function
 multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
   library(grid)
   plots <- c(list(...), plotlist)

@@ -1,0 +1,199 @@
+---
+Title: "Beta Diversity"
+Author: Henry Paz (henry.paz@huskers.unl.edu)
+Output:
+  html_document:
+    keep_md: yes
+---
+
+The following summarizes taxa, determines a core measurable microbiome, and calculates beta diversity within heifer and steer cohorts.
+
+## Summarize taxa across samples within heifer and steer cohorts
+
+```{r, engine='bash'}
+#Summarize taxa for heifer cohort
+summarize_taxa.py -i biom_files/otu_table_discovery_rarefied_heifer.biom -o summarized_taxa_heifer -L 2,3,4,5,6,7
+
+#Summarize taxa for steer cohort
+summarize_taxa.py -i biom_files/otu_table_discovery_rarefied_steer.biom -o summarized_taxa_steer -L 2,3,4,5,6,7
+
+sed 's/#OTU ID/Phylum/g' summarized_taxa_heifer/otu_table_discovery_rarefied_heifer_L2.txt > r_inputs/otu_table_discovery_rarefied_heifer_L2.txt
+
+sed 's/#OTU ID/Phylum/g' summarized_taxa_steer/otu_table_discovery_rarefied_steer_L2.txt > r_inputs/otu_table_discovery_rarefied_steer_L2.txt
+```
+
+## Phyla stacked bar graphs for heifer and steer cohorts
+
+```{r}
+#Load packages
+library(tidyr)
+library(ggplot2)
+
+#Create phyla data set for heifer cohort
+taxa_data_heifer <- read.table("r_inputs/otu_table_discovery_rarefied_heifer_L2.txt", sep="\t", header=F)
+taxa_data_heifer$Phylum <- sub("k__", "", taxa_data_heifer$Phylum)
+taxa_data_heifer$Phylum <- sub("Bacteria;", "", taxa_data_heifer$Phylum)
+taxa_data_heifer$Phylum <- sub("p__", "", taxa_data_heifer$Phylum)
+taxa_data_heifer$Phylum <- sub("\\[", "", taxa_data_heifer$Phylum)
+taxa_data_heifer$Phylum <- sub("\\]", "", taxa_data_heifer$Phylum)
+taxa_data_heifer$Phylum <- sub("Other", "No Assigned Phylum", taxa_data_heifer$Phylum)
+
+#Convert data from wide to long format
+plot_taxa_long_heifer <- gather(taxa_data_heifer, Samples, Proportion, S712:S357)
+
+#Phyla stacked bar graph for heifer cohort
+graph_heifer <- ggplot(plot_taxa_long_heifer, aes(x=Samples, y=Proportion, fill=Phylum)) + geom_bar(stat="identity") + theme(axis.line=element_line(color="black", size=1), axis.text=element_text(color="black", size=11, face="bold"), 
+axis.title=element_text(color="black", size=14, face="bold"), 
+legend.title=element_text(color="black", size=14, face="bold", hjust=0.5), legend.text=element_text(color="black", size=12, face="bold")) + scale_fill_manual(values=c("#FF0000","#FFA500","#0000FF","#ADD8E6","#00FFFF","#FFFF00","#800080","#FFC0CB","#5F9EA0","#A52A2A","#808080","#00FF00","#000080","#556B2F","#00FA9A","#FFD700","#DA70D6","#E9967A","#808000","#DC143C","#BC8F8F","#E6E6FA","#C71585"))
+
+png("figures/FigureS5.png", units="in", height=12, width=18, res=300)
+graph_heifer
+dev.off()
+
+pdf("figures/FigureS5.pdf", height=12, width=18)
+graph_heifer
+dev.off()
+
+#Create phyla data set for steer cohort
+taxa_data_steer <- read.table("r_inputs/otu_table_discovery_rarefied_steer_L2.txt", sep="\t", header=F)
+taxa_data_steer$Phylum <- sub("k__", "", taxa_data_steer$Phylum)
+taxa_data_steer$Phylum <- sub("Bacteria;", "", taxa_data_steer$Phylum)
+taxa_data_steer$Phylum <- sub("p__", "", taxa_data_steer$Phylum)
+taxa_data_steer$Phylum <- sub("\\[", "", taxa_data_steer$Phylum)
+taxa_data_steer$Phylum <- sub("\\]", "", taxa_data_steer$Phylum)
+taxa_data_steer$Phylum <- sub("Other", "No Assigned Phylum", taxa_data_steer$Phylum)
+
+#Convert data from wide to long format
+plot_taxa_long_steer <- gather(taxa_data_steer, Samples, Proportion, S712:S357)
+
+#Phyla stacked bar graph for steer cohort
+graph_steer <- ggplot(plot_taxa_long_steer, aes(x=Samples, y=Proportion, fill=Phylum)) + geom_bar(stat="identity") + theme(axis.line=element_line(color="black", size=1), axis.text=element_text(color="black", size=11, face="bold"), 
+axis.title=element_text(color="black", size=14, face="bold"), 
+legend.title=element_text(color="black", size=14, face="bold", hjust=0.5), legend.text=element_text(color="black", size=12, face="bold")) + scale_fill_manual(values = c("#FF0000","#FFA500","#ADD8E6","#0000FF","#00FFFF","#FFFF00","#FFC0CB","#800080","#5F9EA0","#A52A2A",
+"#808080","#00FF00","#000080","#556B2F","#00FA9A","#FFD700","#DA70D6","#E9967A","#808000","#DC143C"))
+
+png("figures/FigureS6.png", units="in", height=12, width=18, res=300)
+graph_steer
+dev.off()
+
+pdf("figures/FigureS6.pdf", height=12, width=18)
+graph_steer
+dev.off()
+```
+![Phyla Heifer Cohort](figures/FigureS5.png)
+
+![Phyla Steer Cohort](figures/FigureS6.png)
+
+## Create core OTUs files within heifer and steer cohorts
+
+```{r, engine='bash'}
+#Make cores directory
+mkdir cores
+
+#Split rarefied discovery OTU table by feed efficiency phenotype group for heifer cohort
+split_otu_table.py -i biom_files/otu_table_discovery_rarefied_heifer.biom -o split_by_group_heifer -m split_by_sex/mapping_file_discovery__Sex_Heifer__.txt -f Group
+
+#Discard OTUs not found across all ADGH-ADFIH samples
+filter_otus_from_otu_table.py -i split_by_group_heifer/otu_table_discovery_rarefied_heifer__Group_ADGH-ADFIH__.biom -o cores/core_heifer_ADGH_ADFIH.biom -s 4 
+
+#Discard OTUs not found across all ADGH-ADFIL samples
+filter_otus_from_otu_table.py -i split_by_group_heifer/otu_table_discovery_rarefied_heifer__Group_ADGH-ADFIL__.biom -o cores/core_heifer_ADGH_ADFIL.biom -s 4 
+
+#Discard OTUs not found across all ADGL-ADFIH samples
+filter_otus_from_otu_table.py -i split_by_group_heifer/otu_table_discovery_rarefied_heifer__Group_ADGL-ADFIH__.biom -o cores/core_heifer_ADGL_ADFIH.biom -s 4
+
+#Discard OTUs not found across all ADGL-ADFIL samples
+filter_otus_from_otu_table.py -i split_by_group_heifer/otu_table_discovery_rarefied_heifer__Group_ADGL-ADFIL__.biom -o cores/core_heifer_ADGL_ADFIL.biom -s 4
+
+#Merge core files for heifer cohort
+merge_otu_tables.py -i cores/core_heifer_ADGH_ADFIH.biom,cores/core_heifer_ADGH_ADFIL.biom,cores/core_heifer_ADGL_ADFIH.biom,cores/core_heifer_ADGL_ADFIL.biom -o cores/merged_cores_heifer.biom
+
+#Split rarefied discovery OTU table by feed efficiency phenotype group for steer cohort
+split_otu_table.py -i biom_files/otu_table_discovery_rarefied_steer.biom -o split_by_group_steer -m split_by_sex/mapping_file_discovery__Sex_steer__.txt -f Group
+
+#Discard OTUs not found across all ADGH-ADFIH samples
+filter_otus_from_otu_table.py -i split_by_group_steer/otu_table_discovery_rarefied_steer__Group_ADGH-ADFIH__.biom -o cores/core_steer_ADGH_ADFIH.biom -s 4 
+
+#Discard OTUs not found across all ADGH-ADFIL samples
+filter_otus_from_otu_table.py -i split_by_group_steer/otu_table_discovery_rarefied_steer__Group_ADGH-ADFIL__.biom -o cores/core_steer_ADGH_ADFIL.biom -s 4 
+
+#Discard OTUs not found across all ADGL-ADFIH samples
+filter_otus_from_otu_table.py -i split_by_group_steer/otu_table_discovery_rarefied_steer__Group_ADGL-ADFIH__.biom -o cores/core_steer_ADGL_ADFIH.biom -s 4
+
+#Discard OTUs not found across all ADGL-ADFIL samples
+filter_otus_from_otu_table.py -i split_by_group_steer/otu_table_discovery_rarefied_steer__Group_ADGL-ADFIL__.biom -o cores/core_steer_ADGL_ADFIL.biom -s 4
+
+#Merge core files for steer cohort
+merge_otu_tables.py -i cores/core_steer_ADGH_ADFIH.biom,cores/core_steer_ADGH_ADFIL.biom,cores/core_steer_ADGL_ADFIH.biom,cores/core_steer_ADGL_ADFIL.biom -o cores/merged_cores_steer.biom
+```
+
+## Create core OTUs list for heifer and steer cohorts
+
+```{r}
+#Create core OTUs list for heifer cohort
+cores_heifer <- read.table("cores/merged_cores_heifer.txt", sep="\t", header=F)
+cores_heifer_sub <- cores_heifer[, 1]
+write.table(cores_heifer_sub, file="filter_files/core_otus_discovery_heifer.txt", col.names=F, row.names=F)
+
+#Create core OTUs list for steer cohort
+cores_steer <- read.table("cores/merged_cores_steer.txt", sep="\t", header=F)
+cores_steer_sub <- cores_steer[, 1]
+write.table(cores_steer_sub, file = "filter_files/core_otus_discovery_steer.txt", col.names=F, row.names=F)
+```
+
+## Filter core OTUs within heifer and steer cohorts and calculate beta diversity (pairwise sample dissimilarity)
+
+```{r, engine='bash'}
+#Filter core OTUs from heifer cohort 
+filter_otus_from_otu_table.py -i biom_files/otu_table_discovery_rarefied_heifer.biom -o biom_files/final_core_discovery_heifer.biom -e filter_files/core_otus_discovery_heifer.txt --negate_ids_to_exclude 
+
+#Filter core OTUs from steer cohort 
+filter_otus_from_otu_table.py -i biom_files/otu_table_discovery_rarefied_steer.biom -o biom_files/final_core_discovery_steer.biom -e filter_files/core_otus_discovery_heifer.txt --negate_ids_to_exclude 
+
+#Calculate beta diversity for heifer cohort
+beta_diversity_through_plots.py -i biom_files/final_core_discovery_heifer.biom -o beta_div_core_discovery_heifer -t usearch_outputs/otus2.phylip.tre -m split_by_sex/mapping_file_discovery__Sex_Heifer__.txt -p qiime_parameters.txt
+
+#Calculate beta diversity for steer cohort
+beta_diversity_through_plots.py -i biom_files/final_core_discovery_steer.biom -o beta_div_core_discovery_steer -t usearch_outputs/otus2.phylip.tre -m split_by_sex/mapping_file_discovery__Sex_steer__.txt -p qiime_parameters.txt
+
+sed 's/#SampleID/Sample/g' split_by_sex/mapping_file_discovery__Sex_Heifer__.txt > r_inputs/mapping_file_discovery__Sex_Heifer__.txt
+
+sed 's/#SampleID/Sample/g' split_by_sex/mapping_file_discovery__Sex_Steer__.txt > r_inputs/mapping_file_discovery__Sex_Steer__.txt
+```
+
+## PERMANOVA
+
+```{r}
+#Load packages
+library(vegan)
+
+#Create data set for heifer cohort
+mapping_heifer <- read.table("r_inputs/mapping_file_discovery__Sex_Heifer__.txt", sep="\t", header=T)
+
+#Distance matrix
+dm_weighted_heifer <- read.table("beta_div_core_discovery_heifer/weighted_unifrac_dm.txt", sep="\t", header=T)
+
+#Match order of heifer mapping file sample IDs with distance matirx sample IDs
+mapping_heifer = mapping_heifer[match(dm_weighted_heifer$X, mapping_heifer$Sample), ]
+row.names(dm_weighted_heifer) <- dm_weighted_heifer$X
+dm_weighted_heifer <- dm_weighted_heifer[, -1]
+dm_weighted_heifer <- as.dist(dm_weighted_heifer)
+
+#PERMANOVA heifer cohort
+adonis(dm_weighted_heifer ~ Group, permutations=999, data=mapping_heifer)
+
+#Create data set for steer cohort
+mapping_steer <- read.table("r_inputs/mapping_file_discovery__Sex_steer__.txt", sep="\t", header=T)
+
+#Distance matrix
+dm_weighted_steer <- read.table("beta_div_core_discovery_steer/weighted_unifrac_dm.txt", sep="\t", header=T)
+
+#Match order of steer mapping file sample IDs with distance matirx sample IDs
+mapping_steer = mapping_steer[match(dm_weighted_steer$X, mapping_steer$Sample), ]
+row.names(dm_weighted_steer) <- dm_weighted_steer$X
+dm_weighted_steer <- dm_weighted_steer[, -1]
+dm_weighted_steer <- as.dist(dm_weighted_steer)
+
+#PERMANOVA steer cohort
+adonis(dm_weighted_steer ~ Group, permutations=999, data=mapping_steer)
+```
