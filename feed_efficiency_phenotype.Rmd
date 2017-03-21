@@ -276,9 +276,6 @@ dev.off()
 ## Subset discovery set
 
 ```{r, engine='bash'}
-#Subset selected samples across feed efficiency phenotypes (Cartesian quadrants) to create mapping file for the discovery set 
-grep -E "#SampleID|Yes" mapping_files/mapping_file.txt > mapping_files/mapping_file_discovery.txt
-
 #Create file for filtering discovery set from OTU table
 printf "S241\nS254\nS256\nS272\nS281\nS288\nS295\nS303\nS308\nS313\nS346\nS347\nS357\nS380\nS382\nS485\nS486\nS497\nS510\nS512\nS518\nS524\nS525\nS527\nS562\nS567\nS673\nS680\nS694\nS712\nS713\nS715" > filter_files/samples_ids_selected.txt
 

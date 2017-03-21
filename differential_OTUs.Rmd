@@ -1,0 +1,309 @@
+---
+Title: "Relative Abundance OTU table, Differential Abundant OTUs"
+Author: Henry Paz (henry.paz@huskers.unl.edu)
+Output:
+  html_document:
+    keep_md: yes
+---
+
+The following transfromss the discovery OTU table from read counts to relative abundance and identifies differential abundant OTUs across feed efficiency phenotypes within heifer and steer cohorts using the linear discriminant analysis (LDA) effect size [LEfSe](https://www.ncbi.nlm.nih.gov/pubmed/21702898) method. 
+
+## Transfrom discovery OTU table from read counts to relative abundance
+
+```{r, engine='bash'}
+#Convert from biom to txt format 
+biom convert -i biom_files/otu_table_discovery_rarefied_heifer.biom -o biom_files/otu_table_discovery_rarefied_heifer.txt --to-tsv --header-key taxonomy
+
+biom convert -i biom_files/otu_table_discovery_rarefied_steer.biom -o biom_files/otu_table_discovery_rarefied_steer.txt --to-tsv --header-key taxonomy
+
+sed 's/#OTU ID/OTUID/g' biom_files/otu_table_discovery_rarefied_heifer.txt > r_inputs/otu_table_discovery_rarefied_heifer.txt
+
+sed 's/#OTU ID/OTUID/g' biom_files/otu_table_discovery_rarefied_steer.txt > r_inputs/otu_table_discovery_rarefied_steer.txt
+```
+
+```{r}
+#Relative abundance heifer cohort
+rarefied_heifer <- read.table("r_inputs/otu_table_discovery_rarefied_heifer.txt", sep ="\t", header=T)
+row.names(rarefied_heifer) <- rarefied_heifer$OTUID
+rarefied_heifer <- rarefied_heifer[, -1]
+taxonomy_heifer <- subset(rarefied_heifer, select = taxonomy)
+otus_heifer <- rarefied_heifer[, -17]
+heifer_rel <- sweep(otus_heifer, 2, colSums(otus_heifer), FUN="/")
+heifer_abundance_tax <- merge(heifer_rel, taxonomy_heifer, by="row.names")
+names(heifer_abundance_tax)[1] <- "#OTU ID"
+
+write.table(heifer_abundance_tax, sep="\t", file="biom_files/heifer_abundance_tax.txt", col.names=T, row.names=F, quote=F)
+
+#Relative abundance steer cohort
+rarefied_steer <- read.table("r_inputs/otu_table_discovery_rarefied_steer.txt", sep="\t", header=T)
+row.names(rarefied_steer) <- rarefied_steer$OTUID
+rarefied_steer <- rarefied_steer[, -1]
+taxonomy_steer <- subset(rarefied_steer, select = taxonomy)
+otus_steer <- rarefied_steer[, -17]
+steer_rel <- sweep(otus_steer, 2, colSums(otus_steer), FUN="/")
+steer_abundance_tax <- merge(steer_rel, taxonomy_steer, by="row.names")
+names(steer_abundance_tax)[1] <- "#OTU ID"
+
+write.table(steer_abundance_tax, sep="\t", file="biom_files/steer_abundance_tax.txt", col.names=T, row.names=F, quote=F)
+```
+
+```{r, engine='bash'}
+#Convert from txt to biom format 
+biom convert -i biom_files/heifer_abundance_tax.txt -o biom_files/heifer_abundance_tax.biom --to-json --table-type="OTU table" --process-obs-metadata taxonomy
+
+biom convert -i biom_files/steer_abundance_tax.txt -o biom_files/steer_abundance_tax.biom --to-json --table-type="OTU table" --process-obs-metadata taxonomy
+
+#Core relative abundance for heifer cohort 
+filter_otus_from_otu_table.py -i biom_files/heifer_abundance_tax.biom -o biom_files/heifer_abundance_core_tax.biom -e filter_files/core_otus_discovery_heifer.txt --negate_ids_to_exclude 
+
+biom convert -i biom_files/heifer_abundance_core_tax.biom -o biom_files/heifer_abundance_core_tax_json.biom --to-json --table-type="OTU table"
+
+#Core relative abundance for steer cohort
+filter_otus_from_otu_table.py -i biom_files/steer_abundance_tax.biom -o biom_files/steer_abundance_core_tax.biom -e filter_files/core_otus_discovery_steer.txt --negate_ids_to_exclude 
+
+biom convert -i biom_files/steer_abundance_core_tax.biom -o biom_files/steer_abundance_core_tax_json.biom --to-json --table-type="OTU table"
+```
+
+## Create data sets for LEfSe pairwise comparisons across feed efficiency phenotypes within heifer and steer cohorts
+
+```{r}
+#Load packages
+library(biom)
+
+#Create directory
+dir.create("relative_abundance_groups")
+
+#Create data set for heifer cohort
+heifer_biom <- read_biom("biom_files/heifer_abundance_core_tax_json.biom")
+heifer_rel <- as.data.frame(as(biom_data(heifer_biom), "matrix"))
+rownames(heifer_rel) <- paste("OTU", rownames(heifer_rel), sep="")
+heifer_rel2 <- heifer_rel[0, ]
+heifer_rel2[nrow(heifer_rel2) + 1, ] <- c("ADGL-ADFIH", "ADGH-ADFIH", "ADGH-ADFIH", "ADGL-ADFIL", "ADGH-ADFIH", "ADGL-ADFIH", "ADGH-ADFIL", "ADGL-ADFIH", "ADGL-ADFIL", "ADGH-ADFIL", "ADGL-ADFIL", "ADGL-ADFIL", "ADGH-ADFIH", "ADGH-ADFIL", "ADGL-ADFIH", "ADGH-ADFIL")
+heifer_rel2[nrow(heifer_rel2) + 1, ] <- c("S712", "S380", "S382", "S567", "S303", "S713", "S308", "S680", "S673", "S313", "S715", "S347", "S346", "S295", "S694", "S357")
+row.names(heifer_rel2) <- c("Group", "ID")
+heifer_rel_abundance <- rbind(heifer_rel2, heifer_rel)
+
+#Create data sets for pairwise comparisons across feed efficiency phenotypes
+heifer_rel_ADGLADFIH_ADGHADFIH <- heifer_rel_abundance[,c("S712", "S713", "S680", "S694", "S380", "S382", "S303", "S346")]
+
+heifer_rel_ADGLADFIH_ADGLADFIL <- heifer_rel_abundance[,c("S712", "S713", "S680", "S694", "S567", "S673", "S715", "S347")]
+
+heifer_rel_ADGLADFIH_ADGHADFIL <- heifer_rel_abundance[,c("S712", "S713", "S680", "S694", "S308", "S313", "S295", "S357")]
+
+heifer_rel_ADGHADFIH_ADGLADFIL <- heifer_rel_abundance[,c("S380", "S382", "S303", "S346", "S567", "S673", "S715", "S347")]
+
+heifer_rel_ADGHADFIH_ADGHADFIL <- heifer_rel_abundance[,c("S380", "S382", "S303", "S346", "S308", "S313", "S295", "S357")]
+
+heifer_rel_ADGLADFIL_ADGHADFIL <- heifer_rel_abundance[,c("S567", "S673", "S715", "S347", "S308", "S313", "S295", "S357")]
+
+#Pairwise comparisons files
+write.table(heifer_rel_abundance, file="relative_abundance_groups/heifer_rel_abundance.txt", sep="\t", col.names=F, row.names=T, quote=F)
+
+write.table(heifer_rel_ADGLADFIH_ADGHADFIH, file="relative_abundance_groups/heifer_rel_ADGLADFIH_ADGHADFIH.txt", sep ="\t", col.names=F, row.names=T, quote=F)
+
+write.table(heifer_rel_ADGLADFIH_ADGLADFIL, file="relative_abundance_groups/heifer_rel_ADGLADFIH_ADGLADFIL.txt", sep ="\t", col.names=F, row.names=T, quote=F)
+
+write.table(heifer_rel_ADGLADFIH_ADGHADFIL, file="relative_abundance_groups/heifer_rel_ADGLADFIH_ADGHADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
+
+write.table(heifer_rel_ADGHADFIH_ADGLADFIL, file="relative_abundance_groups/heifer_rel_ADGHADFIH_ADGLADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
+
+write.table(heifer_rel_ADGHADFIH_ADGHADFIL, file="relative_abundance_groups/heifer_rel_ADGHADFIH_ADGHADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
+
+write.table(heifer_rel_ADGLADFIL_ADGHADFIL, file="relative_abundance_groups/heifer_rel_ADGLADFIL_ADGHADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
+
+
+#Create data set for steer cohort
+steer_biom <- read_biom("biom_files/steer_abundance_core_tax_json.biom")
+steer_rel <- as.data.frame(as(biom_data(steer_biom), "matrix"))
+rownames(steer_rel) <- paste("OTU", rownames(steer_rel), sep = "")
+steer_rel2 <- steer_rel[0, ]
+steer_rel2[nrow(steer_rel2) + 1, ] <- c("ADGL-ADFIH", "ADGL-ADFIL", "ADGL-ADFIL", "ADGL-ADFIL", "ADGL-ADFIH", "ADGH-ADFIH", "ADGL-ADFIH", "ADGL-ADFIL", "ADGH-ADFIL", "ADGH-ADFIH", "ADGH-ADFIL", "ADGH-ADFIL", "ADGL-ADFIH", "ADGH-ADFIL", "ADGH-ADFIH", "ADGH-ADFIH")
+steer_rel2[nrow(steer_rel2) + 1, ] <- c("S525", "S256", "S485", "S281", "S272", "S527", "S510", "S486", "S562", "S254", "S518", "S524", "S288", "S241", "S512", "S497")
+row.names(steer_rel2) <- c("Group", "ID")
+steer_rel_abundance <- rbind(steer_rel2, steer_rel)
+
+#Create data sets for pairwise comparisons across feed efficiency phenotypes
+steer_rel_ADGLADFIH_ADGHADFIH <- steer_rel_abundance[,c("S525", "S272", "S510", "S288", "S527", "S254", "S512", "S497")]
+
+steer_rel_ADGLADFIH_ADGLADFIL <- steer_rel_abundance[,c("S525", "S272", "S510", "S288", "S256", "S485", "S281", "S486")]
+
+steer_rel_ADGLADFIH_ADGHADFIL <- steer_rel_abundance[,c("S525", "S272", "S510", "S288", "S562", "S518", "S524", "S241")]
+
+steer_rel_ADGHADFIH_ADGLADFIL <- steer_rel_abundance[,c("S527", "S254", "S512", "S497", "S256", "S485", "S281", "S486")]
+
+steer_rel_ADGHADFIH_ADGHADFIL <- steer_rel_abundance[,c("S527", "S254", "S512", "S497", "S562", "S518", "S524", "S241")]
+
+steer_rel_ADGLADFIL_ADGHADFIL <- steer_rel_abundance[,c("S256", "S485", "S281", "S486", "S562", "S518", "S524", "S241")]
+
+#Pairwise comparisons files
+write.table(steer_rel_abundance, file="relative_abundance_groups/steer_rel_abundance.txt", sep="\t", col.names=F, row.names=T, quote=F)
+
+write.table(steer_rel_ADGLADFIH_ADGHADFIH, file="relative_abundance_groups/steer_rel_ADGLADFIH_ADGHADFIH.txt", sep="\t", col.names=F, row.names=T,  quote=F)
+
+write.table(steer_rel_ADGLADFIH_ADGLADFIL, file="relative_abundance_groups/steer_rel_ADGLADFIH_ADGLADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
+
+write.table(steer_rel_ADGLADFIH_ADGHADFIL, file="relative_abundance_groups/steer_rel_ADGLADFIH_ADGHADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
+
+write.table(steer_rel_ADGHADFIH_ADGLADFIL, file="relative_abundance_groups/steer_rel_ADGHADFIH_ADGLADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
+
+write.table(steer_rel_ADGHADFIH_ADGHADFIL, file="relative_abundance_groups/steer_rel_ADGHADFIH_ADGHADFIL.txt", sep = "\t", col.names=F, row.names=T, quote=F)
+
+write.table(steer_rel_ADGLADFIL_ADGHADFIL, file="relative_abundance_groups/steer_rel_ADGLADFIL_ADGHADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
+```
+
+## Identify differential abundant OTUs across feed efficiency phenotypes within heifer and steer cohorts
+
+```{r, engine='bash'}
+#Create directory
+mkdir lefse_outputs
+
+#Pairwise comparisons for heifer cohort  
+lefse-format_input.py relative_abundance_groups/heifer_rel_ADGLADFIH_ADGHADFIH.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIH_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+run_lefse.py lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIH_lefse_format.txt lefse_outputs/heifer_ADGLADFIH_ADGHADFIH_lefse_result.txt
+lefse-plot_res.py lefse_outputs/heifer_ADGLADFIH_ADGHADFIH_lefse_result.txt lefse_outputs/heifer_ADGLADFIH_ADGHADFIH_lefse_result.jpeg --width 12 --height 6 --dpi 300
+
+lefse-format_input.py relative_abundance_groups/heifer_rel_ADGLADFIH_ADGLADFIL.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+run_lefse.py lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt
+lefse-plot_res.py lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt 
+lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+
+lefse-format_input.py relative_abundance_groups/heifer_rel_ADGLADFIH_ADGHADFIL.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+run_lefse.py lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt
+lefse-plot_res.py lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+
+lefse-format_input.py relative_abundance_groups/heifer_rel_ADGHADFIH_ADGLADFIL.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+run_lefse.py lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt
+lefse-plot_res.py lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+
+lefse-format_input.py relative_abundance_groups/heifer_rel_ADGHADFIH_ADGHADFIL.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+run_lefse.py lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt
+lefse-plot_res.py lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+
+lefse-format_input.py relative_abundance_groups/heifer_rel_ADGLADFIL_ADGHADFIL.txt lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+run_lefse.py lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt
+lefse-plot_res.py lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+
+#Pairwise comparisons for heifer steer
+lefse-format_input.py relative_abundance_groups/steer_rel_ADGLADFIH_ADGHADFIH.txt lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIH_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+run_lefse.py lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIH_lefse_format.txt lefse_outputs/steer_ADGLADFIH_ADGHADFIH_lefse_result.txt
+lefse-plot_res.py lefse_outputs/steer_ADGLADFIH_ADGHADFIH_lefse_result.txt lefse_outputs/steer_ADGLADFIH_ADGHADFIH_lefse_result.jpeg --width 12 --height 6 --dpi 300
+
+lefse-format_input.py relative_abundance_groups/steer_rel_ADGLADFIH_ADGLADFIL.txt lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+run_lefse.py lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt
+lefse-plot_res.py lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+
+lefse-format_input.py relative_abundance_groups/steer_rel_ADGLADFIH_ADGHADFIL.txt lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+run_lefse.py lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt
+lefse-plot_res.py lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+
+lefse-format_input.py relative_abundance_groups/steer_rel_ADGHADFIH_ADGLADFIL.txt lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+run_lefse.py lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt
+lefse-plot_res.py lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+
+lefse-format_input.py relative_abundance_groups/steer_rel_ADGHADFIH_ADGHADFIL.txt lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+run_lefse.py lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt
+lefse-plot_res.py lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+
+lefse-format_input.py relative_abundance_groups/steer_rel_ADGLADFIL_ADGHADFIL.txt lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+run_lefse.py lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt
+lefse-plot_res.py lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+```
+
+```{r}
+#Create directory
+dir.create("differential_otus")
+
+#Create lists of differential OTUs across pairwise comparisons within heifer cohort
+heifer_ADGLADFIH_ADGHADFIH_lefse <- read.table("lefse_outputs/heifer_ADGLADFIH_ADGHADFIH_lefse_result.txt", sep="\t", header=F)
+heifer_ADGLADFIH_ADGHADFIH_lefse <- heifer_ADGLADFIH_ADGHADFIH_lefse[complete.cases(heifer_ADGLADFIH_ADGHADFIH_lefse), ]
+heifer_ADGLADFIH_ADGHADFIH_lefse$V1 <- gsub("OTU", "", heifer_ADGLADFIH_ADGHADFIH_lefse$V1)
+heifer_ADGLADFIH_ADGHADFIH_lefse <- heifer_ADGLADFIH_ADGHADFIH_lefse[order(-heifer_ADGLADFIH_ADGHADFIH_lefse$V4),]
+heifer_ADGLADFIH_ADGHADFIH_lefse <- heifer_ADGLADFIH_ADGHADFIH_lefse[1:10,]
+write.table(heifer_ADGLADFIH_ADGHADFIH_lefse$V1, file="differential_otus/heifer_ADGLADFIH_ADGHADFIH_lefse.txt", col.names=F, row.names=F, quote=F)
+
+heifer_ADGLADFIH_ADGLADFIL_lefse <- read.table("lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt", sep="\t", header=F)
+heifer_ADGLADFIH_ADGLADFIL_lefse <- heifer_ADGLADFIH_ADGLADFIL_lefse[complete.cases(heifer_ADGLADFIH_ADGLADFIL_lefse), ]
+heifer_ADGLADFIH_ADGLADFIL_lefse$V1 <- gsub("OTU", "", heifer_ADGLADFIH_ADGLADFIL_lefse$V1)
+heifer_ADGLADFIH_ADGLADFIL_lefse <- heifer_ADGLADFIH_ADGLADFIL_lefse[order(-heifer_ADGLADFIH_ADGLADFIL_lefse$V4),]
+heifer_ADGLADFIH_ADGLADFIL_lefse <- heifer_ADGLADFIH_ADGLADFIL_lefse[1:10,]
+write.table(heifer_ADGLADFIH_ADGLADFIL_lefse$V1, file="differential_otus/heifer_ADGLADFIH_ADGLADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+
+heifer_ADGLADFIH_ADGHADFIL_lefse <- read.table("lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt", sep="\t", header=F)
+heifer_ADGLADFIH_ADGHADFIL_lefse <- heifer_ADGLADFIH_ADGHADFIL_lefse[complete.cases(heifer_ADGLADFIH_ADGHADFIL_lefse), ]
+heifer_ADGLADFIH_ADGHADFIL_lefse$V1 <- gsub("OTU", "", heifer_ADGLADFIH_ADGHADFIL_lefse$V1)
+heifer_ADGLADFIH_ADGHADFIL_lefse <- heifer_ADGLADFIH_ADGHADFIL_lefse[order(-heifer_ADGLADFIH_ADGHADFIL_lefse$V4),]
+heifer_ADGLADFIH_ADGHADFIL_lefse <- heifer_ADGLADFIH_ADGHADFIL_lefse[1:10,]
+write.table(heifer_ADGLADFIH_ADGHADFIL_lefse$V1, file="differential_otus/heifer_ADGLADFIH_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+
+heifer_ADGHADFIH_ADGLADFIL_lefse <- read.table("lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt", sep="\t", header=F)
+heifer_ADGHADFIH_ADGLADFIL_lefse <- heifer_ADGHADFIH_ADGLADFIL_lefse[complete.cases(heifer_ADGHADFIH_ADGLADFIL_lefse), ]
+heifer_ADGHADFIH_ADGLADFIL_lefse$V1 <- gsub("OTU", "", heifer_ADGHADFIH_ADGLADFIL_lefse$V1)
+heifer_ADGHADFIH_ADGLADFIL_lefse <- heifer_ADGHADFIH_ADGLADFIL_lefse[order(-heifer_ADGHADFIH_ADGLADFIL_lefse$V4),]
+heifer_ADGHADFIH_ADGLADFIL_lefse <- heifer_ADGHADFIH_ADGLADFIL_lefse[1:10,]
+write.table(heifer_ADGHADFIH_ADGLADFIL_lefse$V1, file="differential_otus/heifer_ADGHADFIH_ADGLADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+
+heifer_ADGHADFIH_ADGHADFIL_lefse <- read.table("lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt", sep="\t", header=F)
+heifer_ADGHADFIH_ADGHADFIL_lefse <- heifer_ADGHADFIH_ADGHADFIL_lefse[complete.cases(heifer_ADGHADFIH_ADGHADFIL_lefse), ]
+heifer_ADGHADFIH_ADGHADFIL_lefse$V1 <- gsub("OTU", "", heifer_ADGHADFIH_ADGHADFIL_lefse$V1)
+heifer_ADGHADFIH_ADGHADFIL_lefse <- heifer_ADGHADFIH_ADGHADFIL_lefse[order(-heifer_ADGHADFIH_ADGHADFIL_lefse$V4),]
+heifer_ADGHADFIH_ADGHADFIL_lefse <- heifer_ADGHADFIH_ADGHADFIL_lefse[1:10,]
+write.table(heifer_ADGHADFIH_ADGHADFIL_lefse$V1, file="differential_otus/heifer_ADGHADFIH_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+
+heifer_ADGLADFIL_ADGHADFIL_lefse <- read.table("lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt", sep="\t", header=F)
+heifer_ADGLADFIL_ADGHADFIL_lefse <- heifer_ADGLADFIL_ADGHADFIL_lefse[complete.cases(heifer_ADGLADFIL_ADGHADFIL_lefse), ]
+heifer_ADGLADFIL_ADGHADFIL_lefse$V1 <- gsub("OTU", "", heifer_ADGLADFIL_ADGHADFIL_lefse$V1)
+heifer_ADGLADFIL_ADGHADFIL_lefse <- heifer_ADGLADFIL_ADGHADFIL_lefse[order(-heifer_ADGLADFIL_ADGHADFIL_lefse$V4),]
+heifer_ADGLADFIL_ADGHADFIL_lefse <- heifer_ADGLADFIL_ADGHADFIL_lefse[1:10,]
+write.table(heifer_ADGLADFIL_ADGHADFIL_lefse$V1, file="differential_otus/heifer_ADGLADFIL_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+
+#Create lists of differential OTUs across pairwise comparisons within steer cohort
+steer_ADGLADFIH_ADGHADFIH_lefse <- read.table("lefse_outputs/steer_ADGLADFIH_ADGHADFIH_lefse_result.txt", sep="\t", header=F)
+steer_ADGLADFIH_ADGHADFIH_lefse <- steer_ADGLADFIH_ADGHADFIH_lefse[complete.cases(steer_ADGLADFIH_ADGHADFIH_lefse), ]
+steer_ADGLADFIH_ADGHADFIH_lefse$V1 <- gsub("OTU", "", steer_ADGLADFIH_ADGHADFIH_lefse$V1)
+steer_ADGLADFIH_ADGHADFIH_lefse <- steer_ADGLADFIH_ADGHADFIH_lefse[order(-steer_ADGLADFIH_ADGHADFIH_lefse$V4),]
+steer_ADGLADFIH_ADGHADFIH_lefse <- steer_ADGLADFIH_ADGHADFIH_lefse[1:10,]
+write.table(steer_ADGLADFIH_ADGHADFIH_lefse$V1, file="differential_otus/steer_ADGLADFIH_ADGHADFIH_lefse.txt", col.names=F, row.names=F, quote=F)
+
+steer_ADGLADFIH_ADGLADFIL_lefse <- read.table("lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt", sep="\t", header=F)
+steer_ADGLADFIH_ADGLADFIL_lefse <- steer_ADGLADFIH_ADGLADFIL_lefse[complete.cases(steer_ADGLADFIH_ADGLADFIL_lefse), ]
+steer_ADGLADFIH_ADGLADFIL_lefse$V1 <- gsub("OTU", "", steer_ADGLADFIH_ADGLADFIL_lefse$V1)
+steer_ADGLADFIH_ADGLADFIL_lefse <- steer_ADGLADFIH_ADGLADFIL_lefse[order(-steer_ADGLADFIH_ADGLADFIL_lefse$V4),]
+steer_ADGLADFIH_ADGLADFIL_lefse <- steer_ADGLADFIH_ADGLADFIL_lefse[1:10,]
+write.table(steer_ADGLADFIH_ADGLADFIL_lefse$V1, file="differential_otus/steer_ADGLADFIH_ADGLADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+
+steer_ADGLADFIH_ADGHADFIL_lefse <- read.table("lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt", sep="\t", header=F)
+steer_ADGLADFIH_ADGHADFIL_lefse <- steer_ADGLADFIH_ADGHADFIL_lefse[complete.cases(steer_ADGLADFIH_ADGHADFIL_lefse), ]
+steer_ADGLADFIH_ADGHADFIL_lefse$V1 <- gsub("OTU", "", steer_ADGLADFIH_ADGHADFIL_lefse$V1)
+steer_ADGLADFIH_ADGHADFIL_lefse <- steer_ADGLADFIH_ADGHADFIL_lefse[order(-steer_ADGLADFIH_ADGHADFIL_lefse$V4),]
+steer_ADGLADFIH_ADGHADFIL_lefse <- steer_ADGLADFIH_ADGHADFIL_lefse[1:10,]
+write.table(steer_ADGLADFIH_ADGHADFIL_lefse$V1, file="differential_otus/steer_ADGLADFIH_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+
+steer_ADGHADFIH_ADGLADFIL_lefse <- read.table("lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt", sep="\t", header=F)
+steer_ADGHADFIH_ADGLADFIL_lefse <- steer_ADGHADFIH_ADGLADFIL_lefse[complete.cases(steer_ADGHADFIH_ADGLADFIL_lefse), ]
+steer_ADGHADFIH_ADGLADFIL_lefse$V1 <- gsub("OTU", "", steer_ADGHADFIH_ADGLADFIL_lefse$V1)
+steer_ADGHADFIH_ADGLADFIL_lefse <- steer_ADGHADFIH_ADGLADFIL_lefse[order(-steer_ADGHADFIH_ADGLADFIL_lefse$V4),]
+steer_ADGHADFIH_ADGLADFIL_lefse <- steer_ADGHADFIH_ADGLADFIL_lefse[1:10,]
+write.table(steer_ADGHADFIH_ADGLADFIL_lefse$V1, file="differential_otus/steer_ADGHADFIH_ADGLADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+
+steer_ADGHADFIH_ADGHADFIL_lefse <- read.table("lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt", sep="\t", header=F)
+steer_ADGHADFIH_ADGHADFIL_lefse <- steer_ADGHADFIH_ADGHADFIL_lefse[complete.cases(steer_ADGHADFIH_ADGHADFIL_lefse), ]
+steer_ADGHADFIH_ADGHADFIL_lefse$V1 <- gsub("OTU", "", steer_ADGHADFIH_ADGHADFIL_lefse$V1)
+steer_ADGHADFIH_ADGHADFIL_lefse <- steer_ADGHADFIH_ADGHADFIL_lefse[order(-steer_ADGHADFIH_ADGHADFIL_lefse$V4),]
+steer_ADGHADFIH_ADGHADFIL_lefse <- steer_ADGHADFIH_ADGHADFIL_lefse[1:10,]
+write.table(steer_ADGHADFIH_ADGHADFIL_lefse$V1, file="differential_otus/steer_ADGHADFIH_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+
+steer_ADGLADFIL_ADGHADFIL_lefse <- read.table("lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt", sep="\t", header=F)
+steer_ADGLADFIL_ADGHADFIL_lefse <- steer_ADGLADFIL_ADGHADFIL_lefse[complete.cases(steer_ADGLADFIL_ADGHADFIL_lefse), ]
+steer_ADGLADFIL_ADGHADFIL_lefse$V1 <- gsub("OTU", "", steer_ADGLADFIL_ADGHADFIL_lefse$V1)
+steer_ADGLADFIL_ADGHADFIL_lefse <- steer_ADGLADFIL_ADGHADFIL_lefse[order(-steer_ADGLADFIL_ADGHADFIL_lefse$V4),]
+steer_ADGLADFIL_ADGHADFIL_lefse <- steer_ADGLADFIL_ADGHADFIL_lefse[1:10,]
+write.table(steer_ADGLADFIL_ADGHADFIL_lefse$V1, file="differential_otus/steer_ADGLADFIL_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+```
+
+```{r, engine='bash'}
+#Concatenate lists of differential OTUs within heifer cohort
+cat differential_otus/heifer_ADGHADFIH_ADGHADFIL_lefse.txt differential_otus/heifer_ADGHADFIH_ADGLADFIL_lefse.txt differential_otus/heifer_ADGLADFIH_ADGHADFIH_lefse.txt differential_otus/heifer_ADGLADFIH_ADGHADFIL_lefse.txt differential_otus/heifer_ADGLADFIH_ADGLADFIL_lefse.txt differential_otus/heifer_ADGLADFIL_ADGHADFIL_lefse.txt | sort | uniq > differential_otus/heifer_differential_otus.txt
+
+#Concatenate lists of differential OTUs within steer cohort
+cat differential_otus/steer_ADGHADFIH_ADGHADFIL_lefse.txt differential_otus/steer_ADGHADFIH_ADGLADFIL_lefse.txt differential_otus/steer_ADGLADFIH_ADGHADFIH_lefse.txt differential_otus/steer_ADGLADFIH_ADGHADFIL_lefse.txt differential_otus/steer_ADGLADFIH_ADGLADFIL_lefse.txt differential_otus/steer_ADGLADFIL_ADGHADFIL_lefse.txt | sort | uniq > differential_otus/steer_differential_otus.txt
+```

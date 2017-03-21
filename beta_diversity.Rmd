@@ -1,5 +1,5 @@
 ---
-Title: "Beta Diversity"
+Title: "Summarizes Taxa, Core Measurable Microbiome, Beta Diversity"
 Author: Henry Paz (henry.paz@huskers.unl.edu)
 Output:
   html_document:
@@ -17,9 +17,9 @@ summarize_taxa.py -i biom_files/otu_table_discovery_rarefied_heifer.biom -o summ
 #Summarize taxa for steer cohort
 summarize_taxa.py -i biom_files/otu_table_discovery_rarefied_steer.biom -o summarized_taxa_steer -L 2,3,4,5,6,7
 
-sed 's/#OTU ID/Phylum/g' summarized_taxa_heifer/otu_table_discovery_rarefied_heifer_L2.txt > r_inputs/otu_table_discovery_rarefied_heifer_L2.txt
+sed 's/#OTU ID/Phyla/g' summarized_taxa_heifer/otu_table_discovery_rarefied_heifer_L2.txt > r_inputs/otu_table_discovery_rarefied_heifer_L2.txt
 
-sed 's/#OTU ID/Phylum/g' summarized_taxa_steer/otu_table_discovery_rarefied_steer_L2.txt > r_inputs/otu_table_discovery_rarefied_steer_L2.txt
+sed 's/#OTU ID/Phyla/g' summarized_taxa_steer/otu_table_discovery_rarefied_steer_L2.txt > r_inputs/otu_table_discovery_rarefied_steer_L2.txt
 ```
 
 ## Phyla stacked bar graphs for heifer and steer cohorts
@@ -30,21 +30,17 @@ library(tidyr)
 library(ggplot2)
 
 #Create phyla data set for heifer cohort
-taxa_data_heifer <- read.table("r_inputs/otu_table_discovery_rarefied_heifer_L2.txt", sep="\t", header=F)
-taxa_data_heifer$Phylum <- sub("k__", "", taxa_data_heifer$Phylum)
-taxa_data_heifer$Phylum <- sub("Bacteria;", "", taxa_data_heifer$Phylum)
-taxa_data_heifer$Phylum <- sub("p__", "", taxa_data_heifer$Phylum)
-taxa_data_heifer$Phylum <- sub("\\[", "", taxa_data_heifer$Phylum)
-taxa_data_heifer$Phylum <- sub("\\]", "", taxa_data_heifer$Phylum)
-taxa_data_heifer$Phylum <- sub("Other", "No Assigned Phylum", taxa_data_heifer$Phylum)
+taxa_data_heifer <- read.table("r_inputs/otu_table_discovery_rarefied_heifer_L2.txt", sep="\t", header=T) 
+taxa_data_heifer$Phyla <- sub("k__Bacteria;p__", "", taxa_data_heifer$Phyla)
+taxa_data_heifer$Phyla <- sub("\\[", "", taxa_data_heifer$Phyla)
+taxa_data_heifer$Phyla <- sub("\\]", "", taxa_data_heifer$Phyla)
+taxa_data_heifer$Phyla <- sub("k__Bacteria;k\\\\_\\\\_Bacteria_unclassified", "No Assigned Phyla", taxa_data_heifer$Phyla)
 
 #Convert data from wide to long format
 plot_taxa_long_heifer <- gather(taxa_data_heifer, Samples, Proportion, S712:S357)
 
 #Phyla stacked bar graph for heifer cohort
-graph_heifer <- ggplot(plot_taxa_long_heifer, aes(x=Samples, y=Proportion, fill=Phylum)) + geom_bar(stat="identity") + theme(axis.line=element_line(color="black", size=1), axis.text=element_text(color="black", size=11, face="bold"), 
-axis.title=element_text(color="black", size=14, face="bold"), 
-legend.title=element_text(color="black", size=14, face="bold", hjust=0.5), legend.text=element_text(color="black", size=12, face="bold")) + scale_fill_manual(values=c("#FF0000","#FFA500","#0000FF","#ADD8E6","#00FFFF","#FFFF00","#800080","#FFC0CB","#5F9EA0","#A52A2A","#808080","#00FF00","#000080","#556B2F","#00FA9A","#FFD700","#DA70D6","#E9967A","#808000","#DC143C","#BC8F8F","#E6E6FA","#C71585"))
+graph_heifer <- ggplot(plot_taxa_long_heifer, aes(x=Samples, y=Proportion, fill=Phyla)) + geom_bar(stat="identity") + theme(axis.line=element_line(color="black", size=1), axis.text=element_text(color="black", size=11, face="bold"), axis.title=element_text(color="black", size=14, face="bold"), legend.title=element_text(color="black", size=14, face="bold", hjust=0.5), legend.text=element_text(color="black", size=12, face="bold")) + scale_fill_manual(values=c("#FF0000","#ADD8E6","#FFA500","#000080","#A52A2A","#008080","#808080","#DA70D6","#008000","#800080","#E9967A","#FFD700","#00FF00","#5F9EA0","#FF6347","#DC143C","#DCDCDC","#DEB887","#00FA9A","#BC8F8F","#E6E6FA","#556B2F","#C71585","#808000","#FFC0CB","#0000FF","#FFFF00","#00FFFF"))
 
 png("figures/FigureS5.png", units="in", height=12, width=18, res=300)
 graph_heifer
@@ -55,22 +51,17 @@ graph_heifer
 dev.off()
 
 #Create phyla data set for steer cohort
-taxa_data_steer <- read.table("r_inputs/otu_table_discovery_rarefied_steer_L2.txt", sep="\t", header=F)
-taxa_data_steer$Phylum <- sub("k__", "", taxa_data_steer$Phylum)
-taxa_data_steer$Phylum <- sub("Bacteria;", "", taxa_data_steer$Phylum)
-taxa_data_steer$Phylum <- sub("p__", "", taxa_data_steer$Phylum)
-taxa_data_steer$Phylum <- sub("\\[", "", taxa_data_steer$Phylum)
-taxa_data_steer$Phylum <- sub("\\]", "", taxa_data_steer$Phylum)
-taxa_data_steer$Phylum <- sub("Other", "No Assigned Phylum", taxa_data_steer$Phylum)
+taxa_data_steer <- read.table("r_inputs/otu_table_discovery_rarefied_steer_L2.txt", sep="\t", header=T)
+taxa_data_steer$Phyla <- sub("k__Bacteria;p__", "", taxa_data_steer$Phyla)
+taxa_data_steer$Phyla <- sub("\\[", "", taxa_data_steer$Phyla)
+taxa_data_steer$Phyla <- sub("\\]", "", taxa_data_steer$Phyla)
+taxa_data_steer$Phyla <- sub("k__Bacteria;k\\\\_\\\\_Bacteria_unclassified", "No Assigned Phyla", taxa_data_steer$Phyla)
 
 #Convert data from wide to long format
-plot_taxa_long_steer <- gather(taxa_data_steer, Samples, Proportion, S712:S357)
+plot_taxa_long_steer <- gather(taxa_data_steer, Samples, Proportion, S525:S497)
 
 #Phyla stacked bar graph for steer cohort
-graph_steer <- ggplot(plot_taxa_long_steer, aes(x=Samples, y=Proportion, fill=Phylum)) + geom_bar(stat="identity") + theme(axis.line=element_line(color="black", size=1), axis.text=element_text(color="black", size=11, face="bold"), 
-axis.title=element_text(color="black", size=14, face="bold"), 
-legend.title=element_text(color="black", size=14, face="bold", hjust=0.5), legend.text=element_text(color="black", size=12, face="bold")) + scale_fill_manual(values = c("#FF0000","#FFA500","#ADD8E6","#0000FF","#00FFFF","#FFFF00","#FFC0CB","#800080","#5F9EA0","#A52A2A",
-"#808080","#00FF00","#000080","#556B2F","#00FA9A","#FFD700","#DA70D6","#E9967A","#808000","#DC143C"))
+graph_steer <- ggplot(plot_taxa_long_steer, aes(x=Samples, y=Proportion, fill=Phyla)) + geom_bar(stat="identity") + theme(axis.line=element_line(color="black", size=1), axis.text=element_text(color="black", size=11, face="bold"), axis.title=element_text(color="black", size=14, face="bold"), legend.title=element_text(color="black", size=14, face="bold", hjust=0.5), legend.text=element_text(color="black", size=12, face="bold")) + scale_fill_manual(values = c("#FF0000","#ADD8E6","#FFA500","#000080","#A52A2A","#808080","#DA70D6","#008000","#800080","#E9967A","#FFD700","#00FF00","#DC143C","#5F9EA0","#EEE8AA","#00FA9A","#483D8B","#E6E6FA","#556B2F","#C71585","#808000","#FFC0CB","#FAF0E6","#0000FF","#FFFF00","#00FFFF"))
 
 png("figures/FigureS6.png", units="in", height=12, width=18, res=300)
 graph_steer
@@ -108,8 +99,10 @@ filter_otus_from_otu_table.py -i split_by_group_heifer/otu_table_discovery_raref
 #Merge core files for heifer cohort
 merge_otu_tables.py -i cores/core_heifer_ADGH_ADFIH.biom,cores/core_heifer_ADGH_ADFIL.biom,cores/core_heifer_ADGL_ADFIH.biom,cores/core_heifer_ADGL_ADFIL.biom -o cores/merged_cores_heifer.biom
 
+biom convert -i cores/merged_cores_heifer.biom -o cores/merged_cores_heifer.txt --to-tsv
+
 #Split rarefied discovery OTU table by feed efficiency phenotype group for steer cohort
-split_otu_table.py -i biom_files/otu_table_discovery_rarefied_steer.biom -o split_by_group_steer -m split_by_sex/mapping_file_discovery__Sex_steer__.txt -f Group
+split_otu_table.py -i biom_files/otu_table_discovery_rarefied_steer.biom -o split_by_group_steer -m split_by_sex/mapping_file_discovery__Sex_Steer__.txt -f Group
 
 #Discard OTUs not found across all ADGH-ADFIH samples
 filter_otus_from_otu_table.py -i split_by_group_steer/otu_table_discovery_rarefied_steer__Group_ADGH-ADFIH__.biom -o cores/core_steer_ADGH_ADFIH.biom -s 4 
@@ -125,6 +118,8 @@ filter_otus_from_otu_table.py -i split_by_group_steer/otu_table_discovery_rarefi
 
 #Merge core files for steer cohort
 merge_otu_tables.py -i cores/core_steer_ADGH_ADFIH.biom,cores/core_steer_ADGH_ADFIL.biom,cores/core_steer_ADGL_ADFIH.biom,cores/core_steer_ADGL_ADFIL.biom -o cores/merged_cores_steer.biom
+
+biom convert -i cores/merged_cores_steer.biom -o cores/merged_cores_steer.txt --to-tsv
 ```
 
 ## Create core OTUs list for heifer and steer cohorts
@@ -154,7 +149,7 @@ filter_otus_from_otu_table.py -i biom_files/otu_table_discovery_rarefied_steer.b
 beta_diversity_through_plots.py -i biom_files/final_core_discovery_heifer.biom -o beta_div_core_discovery_heifer -t usearch_outputs/otus2.phylip.tre -m split_by_sex/mapping_file_discovery__Sex_Heifer__.txt -p qiime_parameters.txt
 
 #Calculate beta diversity for steer cohort
-beta_diversity_through_plots.py -i biom_files/final_core_discovery_steer.biom -o beta_div_core_discovery_steer -t usearch_outputs/otus2.phylip.tre -m split_by_sex/mapping_file_discovery__Sex_steer__.txt -p qiime_parameters.txt
+beta_diversity_through_plots.py -i biom_files/final_core_discovery_steer.biom -o beta_div_core_discovery_steer -t usearch_outputs/otus2.phylip.tre -m split_by_sex/mapping_file_discovery__Sex_Steer__.txt -p qiime_parameters.txt
 
 sed 's/#SampleID/Sample/g' split_by_sex/mapping_file_discovery__Sex_Heifer__.txt > r_inputs/mapping_file_discovery__Sex_Heifer__.txt
 
@@ -183,7 +178,7 @@ dm_weighted_heifer <- as.dist(dm_weighted_heifer)
 adonis(dm_weighted_heifer ~ Group, permutations=999, data=mapping_heifer)
 
 #Create data set for steer cohort
-mapping_steer <- read.table("r_inputs/mapping_file_discovery__Sex_steer__.txt", sep="\t", header=T)
+mapping_steer <- read.table("r_inputs/mapping_file_discovery__Sex_Steer__.txt", sep="\t", header=T)
 
 #Distance matrix
 dm_weighted_steer <- read.table("beta_div_core_discovery_steer/weighted_unifrac_dm.txt", sep="\t", header=T)
@@ -196,4 +191,13 @@ dm_weighted_steer <- as.dist(dm_weighted_steer)
 
 #PERMANOVA steer cohort
 adonis(dm_weighted_steer ~ Group, permutations=999, data=mapping_steer)
+```
+
+## Make bipartite networks
+```{r, engine='bash'}
+#Bipartite network for heifer
+make_bipartite_network.py -i biom_files/final_core_discovery_heifer.biom -m split_by_sex/mapping_file_discovery__Sex_Heifer__.txt -k taxonomy --md_fields 'k,p,c,o,f,g,s' -o bipartite_network_heifer/ --scolors 'Group' --ocolors 'p' --osize 'Abundance'
+
+#Bipartite network for steer
+make_bipartite_network.py -i biom_files/final_core_discovery_steer.biom -m split_by_sex/mapping_file_discovery__Sex_Steer__.txt -k taxonomy --md_fields 'k,p,c,o,f,g,s' -o bipartite_network_steer/ --scolors 'Group' --ocolors 'p' --osize 'Abundance'
 ```
