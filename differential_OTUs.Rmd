@@ -111,7 +111,6 @@ write.table(heifer_rel_ADGHADFIH_ADGHADFIL, file="relative_abundance_groups/heif
 
 write.table(heifer_rel_ADGLADFIL_ADGHADFIL, file="relative_abundance_groups/heifer_rel_ADGLADFIL_ADGHADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
 
-
 #Create data set for steer cohort
 steer_biom <- read_biom("biom_files/steer_abundance_core_tax_json.biom")
 steer_rel <- as.data.frame(as(biom_data(steer_biom), "matrix"))
@@ -153,68 +152,64 @@ write.table(steer_rel_ADGLADFIL_ADGHADFIL, file="relative_abundance_groups/steer
 
 ## Identify differential abundant OTUs across feed efficiency phenotypes within heifer and steer cohorts
 
-```{r, engine='bash'}
+Results from LEfSe are provided in the Github [repository](https://github.com/enriquepaz/RumenMicrobiome_Beef) and were generated as described below.
+
+```{r, engine='bash', eval=FALSE}
+#Download LEfSe
+wget https://bitbucket.org/nsegata/lefse/get/default.zip -O lefse.zip
+unzip lefse.zip
+mv nsegata* lefse
+
 #Create directory
 mkdir lefse_outputs
 
 #Pairwise comparisons for heifer cohort  
-lefse-format_input.py relative_abundance_groups/heifer_rel_ADGLADFIH_ADGHADFIH.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIH_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
-run_lefse.py lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIH_lefse_format.txt lefse_outputs/heifer_ADGLADFIH_ADGHADFIH_lefse_result.txt
-lefse-plot_res.py lefse_outputs/heifer_ADGLADFIH_ADGHADFIH_lefse_result.txt lefse_outputs/heifer_ADGLADFIH_ADGHADFIH_lefse_result.jpeg --width 12 --height 6 --dpi 300
+python lefse/format_input.py relative_abundance_groups/heifer_rel_ADGLADFIH_ADGHADFIH.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIH_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python lefse/run_lefse.py lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIH_lefse_format.txt lefse_outputs/heifer_ADGLADFIH_ADGHADFIH_lefse_result.txt
 
-lefse-format_input.py relative_abundance_groups/heifer_rel_ADGLADFIH_ADGLADFIL.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
-run_lefse.py lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt
-lefse-plot_res.py lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt 
-lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+python lefse/format_input.py relative_abundance_groups/heifer_rel_ADGLADFIH_ADGLADFIL.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python lefse/run_lefse.py lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt
 
-lefse-format_input.py relative_abundance_groups/heifer_rel_ADGLADFIH_ADGHADFIL.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
-run_lefse.py lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt
-lefse-plot_res.py lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+python lefse/format_input.py relative_abundance_groups/heifer_rel_ADGLADFIH_ADGHADFIL.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python lefse/run_lefse.py lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt
 
-lefse-format_input.py relative_abundance_groups/heifer_rel_ADGHADFIH_ADGLADFIL.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
-run_lefse.py lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt
-lefse-plot_res.py lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+python lefse/format_input.py relative_abundance_groups/heifer_rel_ADGHADFIH_ADGLADFIL.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python lefse/run_lefse.py lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt
 
-lefse-format_input.py relative_abundance_groups/heifer_rel_ADGHADFIH_ADGHADFIL.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
-run_lefse.py lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt
-lefse-plot_res.py lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+python lefse/format_input.py relative_abundance_groups/heifer_rel_ADGHADFIH_ADGHADFIL.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python lefse/run_lefse.py lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt
 
-lefse-format_input.py relative_abundance_groups/heifer_rel_ADGLADFIL_ADGHADFIL.txt lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
-run_lefse.py lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt
-lefse-plot_res.py lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+python lefse/format_input.py relative_abundance_groups/heifer_rel_ADGLADFIL_ADGHADFIL.txt lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python lefse/run_lefse.py lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt
 
-#Pairwise comparisons for heifer steer
-lefse-format_input.py relative_abundance_groups/steer_rel_ADGLADFIH_ADGHADFIH.txt lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIH_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
-run_lefse.py lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIH_lefse_format.txt lefse_outputs/steer_ADGLADFIH_ADGHADFIH_lefse_result.txt
-lefse-plot_res.py lefse_outputs/steer_ADGLADFIH_ADGHADFIH_lefse_result.txt lefse_outputs/steer_ADGLADFIH_ADGHADFIH_lefse_result.jpeg --width 12 --height 6 --dpi 300
+#Pairwise comparisons for steer cohort
+python lefse/format_input.py relative_abundance_groups/steer_rel_ADGLADFIH_ADGHADFIH.txt lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIH_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python lefse/run_lefse.py lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIH_lefse_format.txt lefse_outputs/steer_ADGLADFIH_ADGHADFIH_lefse_result.txt
 
-lefse-format_input.py relative_abundance_groups/steer_rel_ADGLADFIH_ADGLADFIL.txt lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
-run_lefse.py lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt
-lefse-plot_res.py lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+python lefse/format_input.py relative_abundance_groups/steer_rel_ADGLADFIH_ADGLADFIL.txt lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python lefse/run_lefse.py lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt
 
-lefse-format_input.py relative_abundance_groups/steer_rel_ADGLADFIH_ADGHADFIL.txt lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
-run_lefse.py lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt
-lefse-plot_res.py lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+python lefse/format_input.py relative_abundance_groups/steer_rel_ADGLADFIH_ADGHADFIL.txt lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python lefse/run_lefse.py lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt
 
-lefse-format_input.py relative_abundance_groups/steer_rel_ADGHADFIH_ADGLADFIL.txt lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
-run_lefse.py lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt
-lefse-plot_res.py lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+python lefse/format_input.py relative_abundance_groups/steer_rel_ADGHADFIH_ADGLADFIL.txt lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python lefse/run_lefse.py lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt
 
-lefse-format_input.py relative_abundance_groups/steer_rel_ADGHADFIH_ADGHADFIL.txt lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
-run_lefse.py lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt
-lefse-plot_res.py lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+python lefse/format_input.py relative_abundance_groups/steer_rel_ADGHADFIH_ADGHADFIL.txt lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python lefse/run_lefse.py lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt
 
-lefse-format_input.py relative_abundance_groups/steer_rel_ADGLADFIL_ADGHADFIL.txt lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
-run_lefse.py lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt
-lefse-plot_res.py lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_result.jpeg --width 12 --height 6 --dpi 300
+python lefse/format_input.py relative_abundance_groups/steer_rel_ADGLADFIL_ADGHADFIL.txt lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python lefse/run_lefse.py lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt
 ```
+
+Subset differential abundant OTUs from pairwise comparisons.
 
 ```{r}
 #Create directory
 dir.create("differential_otus")
 
 #Create lists of differential OTUs across pairwise comparisons within heifer cohort
-heifer_ADGLADFIH_ADGHADFIH_lefse <- read.table("lefse_outputs/heifer_ADGLADFIH_ADGHADFIH_lefse_result.txt", sep="\t", header=F)
+heifer_ADGLADFIH_ADGHADFIH_lefse <- read.table("lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIH_lefse_result.txt", sep="\t", header=F)
 heifer_ADGLADFIH_ADGHADFIH_lefse <- heifer_ADGLADFIH_ADGHADFIH_lefse[complete.cases(heifer_ADGLADFIH_ADGHADFIH_lefse), ]
 heifer_ADGLADFIH_ADGHADFIH_lefse$V1 <- gsub("OTU", "", heifer_ADGLADFIH_ADGHADFIH_lefse$V1)
 heifer_ADGLADFIH_ADGHADFIH_lefse <- heifer_ADGLADFIH_ADGHADFIH_lefse[order(-heifer_ADGLADFIH_ADGHADFIH_lefse$V4),]
@@ -257,7 +252,7 @@ heifer_ADGLADFIL_ADGHADFIL_lefse <- heifer_ADGLADFIL_ADGHADFIL_lefse[1:10,]
 write.table(heifer_ADGLADFIL_ADGHADFIL_lefse$V1, file="differential_otus/heifer_ADGLADFIL_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
 
 #Create lists of differential OTUs across pairwise comparisons within steer cohort
-steer_ADGLADFIH_ADGHADFIH_lefse <- read.table("lefse_outputs/steer_ADGLADFIH_ADGHADFIH_lefse_result.txt", sep="\t", header=F)
+steer_ADGLADFIH_ADGHADFIH_lefse <- read.table("lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIH_lefse_result.txt", sep="\t", header=F)
 steer_ADGLADFIH_ADGHADFIH_lefse <- steer_ADGLADFIH_ADGHADFIH_lefse[complete.cases(steer_ADGLADFIH_ADGHADFIH_lefse), ]
 steer_ADGLADFIH_ADGHADFIH_lefse$V1 <- gsub("OTU", "", steer_ADGLADFIH_ADGHADFIH_lefse$V1)
 steer_ADGLADFIH_ADGHADFIH_lefse <- steer_ADGLADFIH_ADGHADFIH_lefse[order(-steer_ADGLADFIH_ADGHADFIH_lefse$V4),]
