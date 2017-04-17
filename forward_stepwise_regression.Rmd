@@ -1,0 +1,376 @@
+---
+Title: "Arcsine Square Root Transformation, Forward Stepwise Regression"
+Author: Henry Paz (henry.paz@huskers.unl.edu)
+Output:
+  html_document:
+    keep_md: yes
+---
+
+The following arcsine square root transforms the test sets and performs forward stepwise regressions for average daily feed intake (ADFI), average daily gain (ADG), feed efficiency (ADG/ADFI) within heifer and steer cohort.
+
+## Subset test sets for heifer and steer cohorts
+
+```{r, engine='bash'}
+sed 's/#SampleID/SampleID/g' mapping_files/mapping_test_set_heifer.txt > r_inputs/mapping_test_set_heifer.txt
+
+sed 's/#SampleID/SampleID/g' mapping_files/mapping_test_set_steer.txt > r_inputs/mapping_test_set_steer.txt
+```
+
+```{r}
+#Create file for filtering test set for heifer cohort
+test_heifer <- read.table("r_inputs/mapping_test_set_heifer.txt", sep="\t", header=T)
+test_heifer_sub <- test_heifer[, 1]
+write.table(test_heifer_sub, file="filter_files/test_set_heifer_filter.txt", col.names=F, row.names=F, quote=F)
+
+#Create file for filtering test set for steer cohort
+cores_steer <- read.table("r_inputs/mapping_test_set_steer.txt", sep="\t", header=T)
+cores_steer_sub <- cores_steer[, 1]
+write.table(cores_steer_sub, file="filter_files/test_set_steer_filter.txt", col.names=F, row.names=F, quote=F)
+```
+
+```{r, engine='bash'}
+#Subset discovery test set for heifer cohort
+filter_samples_from_otu_table.py -i biom_files/otu_table_final.biom -o biom_files/otu_table_test_heifer.biom --sample_id_fp filter_files/test_set_heifer_filter.txt
+biom convert -i biom_files/otu_table_test_heifer.biom -o biom_files/otu_table_test_heifer_json.biom --to-json --table-type="OTU table"
+
+#Subset discovery test set for steer cohort
+filter_samples_from_otu_table.py -i biom_files/otu_table_final.biom -o biom_files/otu_table_test_steer.biom --sample_id_fp filter_files/test_set_steer_filter.txt
+biom convert -i biom_files/otu_table_test_steer.biom -o biom_files/otu_table_test_steer_json.biom --to-json --table-type="OTU table"
+```
+
+## Arcsine square root transformation of test sets for heifer and steer cohorts
+
+```{r}
+#Load packages
+library(biom)
+library(dplyr)
+
+#Make directory
+dir.create("stepwise_reg")
+
+#Differential OTUs sets for heifer and steer cohorts
+differential_otus_heifer <- read.table("differential_otus/heifer_differential_otus.txt", sep="\t", header=F)
+differential_otus_steer <- read.table("differential_otus/steer_differential_otus.txt", sep="\t", header=F)
+
+#Arcsine square root function
+trans.arcsine <- function(x){asin(sign(x) * sqrt(abs(x)))}
+
+#Arcsine square root transformation for test set heifer cohort
+otu_test_heifer <- read_biom("biom_files/otu_table_test_heifer_json.biom")
+otu_test_heifer <- as.data.frame(as(biom_data(otu_test_heifer), "matrix"))
+test_heifer <- sweep(otu_test_heifer, 2, colSums(otu_test_heifer), FUN="/")
+test_heifer[, 1:109] <- as.data.frame(lapply(test_heifer[, 1:109], FUN = function(x) {sapply(x, FUN=trans.arcsine)}))
+test_heifer <- add_rownames(test_heifer, "OTUs")
+test_heifer_filtered <- test_heifer[which(test_heifer$OTUs %in% differential_otus_heifer$V1),]
+test_heifer_trans <- as.data.frame(t(test_heifer_filtered), stringsAsFactors=F)
+colnames(test_heifer_trans) <- test_heifer_trans[1, ]
+test_heifer_trans <- test_heifer_trans[-1, ]
+colnames(test_heifer_trans) <- paste("OTU", colnames(test_heifer_trans), sep="")
+test_heifer_final <- add_rownames(test_heifer_trans, "SampleID")
+write.table(test_heifer_final, file = "stepwise_reg/test_heifer_final.txt", sep="\t", col.names=T, row.names=F, quote=F)
+
+#Arcsine square root transformation for test set steer cohort
+otu_test_steer <- read_biom("biom_files/otu_table_test_steer_json.biom")
+otu_test_steer <- as.data.frame(as(biom_data(otu_test_steer), "matrix"))
+test_steer <- sweep(otu_test_steer, 2, colSums(otu_test_steer), FUN="/")
+test_steer[, 1:106] <- as.data.frame(lapply(test_steer[, 1:106], FUN = function(x) {sapply(x, FUN=trans.arcsine)}))
+test_steer <- add_rownames(test_steer, "OTUs")
+test_steer_filtered <- test_steer[which(test_steer$OTUs %in% differential_otus_steer$V1),]
+test_steer_trans <- as.data.frame(t(test_steer_filtered), stringsAsFactors=F)
+colnames(test_steer_trans) <- test_steer_trans[1, ]
+test_steer_trans <- test_steer_trans[-1, ] 
+colnames(test_steer_trans) <- paste("OTU", colnames(test_steer_trans), sep="")
+test_steer_final <- add_rownames(test_steer_trans, "SampleID")
+write.table(test_steer_final, file = "stepwise_reg/test_steer_final.txt", sep="\t", col.names=T, row.names=F, quote=F)
+
+#Create heifer cohort validation set
+validation_heifer <- test_steer[which(test_steer$OTUs %in% differential_otus_heifer$V1),]
+validation_heifer_trans <- as.data.frame(t(validation_heifer), stringsAsFactors=F)
+colnames(validation_heifer_trans) = validation_heifer_trans[1, ]
+validation_heifer_trans = validation_heifer_trans[-1, ]
+colnames(validation_heifer_trans) <- paste("OTU", colnames(validation_heifer_trans), sep="")
+validation_heifer_final <- add_rownames(validation_heifer_trans, "SampleID")
+write.table(validation_heifer_final, file="stepwise_reg/validation_heifer_final.txt", sep="\t", col.names=T, row.names=F, quote=F)
+
+#Create steer cohort validation set
+validation_steer <- test_heifer[which(test_heifer$OTUs %in% differential_otus_steer$V1),]
+validation_steer_trans <- as.data.frame(t(validation_steer), stringsAsFactors=F)
+colnames(validation_steer_trans) = validation_steer_trans[1, ]
+validation_steer_trans = validation_steer_trans[-1, ]
+colnames(validation_steer_trans) <- paste("OTU", colnames(validation_steer_trans), sep="")
+validation_steer_final <- add_rownames(validation_steer_trans, "SampleID")
+write.table(validation_steer_final, file="stepwise_reg/validation_steer_final.txt", sep="\t", col.names=T, row.names=F, quote=F)
+```
+
+#Forward stepwise regression for average daily feed intake (ADFI), average daily gain (ADG), feed efficiency (ADG/ADFI)
+
+```{r}
+#Load packages
+library(car)
+
+#Create data set for heifer cohort 
+mapping_heifer <- read.table("r_inputs/mapping_test_set_heifer.txt", sep="\t", header=T)
+row.names(mapping_heifer) <- mapping_heifer[,1]
+
+#Linear models for ADFI, ADG, and FE using breed composition as covariates for heifer cohort
+lm_ADFI_heifer <- lm(ADFI ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data = mapping_heifer)
+ADFI_res_heifer <- as.data.frame(resid(lm_ADFI_heifer))
+lm_ADG_heifer <- lm(ADG ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data = mapping_heifer)
+ADG_res_heifer <- as.data.frame(resid(lm_ADG_heifer))
+lm_FE_heifer <- lm(FE ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data = mapping_heifer)
+FE_res_heifer <- as.data.frame(resid(lm_FE_heifer))
+
+#Data sets for heifer cohort
+heifer_otus <- read.table("stepwise_reg/test_heifer_final.txt", sep="\t", header=T)
+row.names(heifer_otus) <- heifer_otus[,1]
+heifer_otus <- heifer_otus[,-1]
+heifer_ADFI <- merge(ADFI_res_heifer,heifer_otus,by="row.names")
+heifer_ADFI <- heifer_ADFI[,-1]
+colnames(heifer_ADFI)[1] <- "ADFI"
+heifer_ADG <- merge(gain_res_heifer,heifer_otus,by="row.names")
+heifer_ADG <- heifer_ADG[,-1]
+colnames(heifer_ADG)[1] <- "ADG"
+heifer_FE <- merge(FE_res_heifer,heifer_otus,by="row.names")
+heifer_FE <- heifer_FE[,-1]
+colnames(heifer_FE)[1] <- "FE"
+
+#Forward stepwise regression models for heifer cohort
+
+#ADFI for heifer cohort
+null_heifer_ADFI=lm(ADFI~1, data=heifer_ADFI)
+#summary(null_heifer_ADFI)
+full_heifer_ADFI=lm(ADFI~., data=heifer_ADFI)
+#summary(full_heifer_ADFI)
+step(null_heifer_ADFI, scope=list(lower=null_heifer_ADFI, upper=full_heifer_ADFI), direction="forward")
+
+#Model ADFI
+model_heifer_ADFI <- lm(formula = ADFI ~ OTU233 + OTU6532 + OTU257 + OTU2045 + OTU125 + OTU517 + OTU5323 + OTU139 + OTU216 + OTU5133, data = heifer_ADFI)
+summary(model_heifer_ADFI)
+#anova(model_heifer_ADFI)
+#Test multi-collinearity (variance inflation factor)
+vif(model_heifer_ADFI)
+sqrt(vif(model_heifer_ADFI)) > 2
+#Homoscedasticity & Normality
+layout(matrix(c(1,2,3,4),2,2))
+plot(model_heifer_ADFI)
+#Extract observed and predicted values
+OP_heifer_ADFI <- data.frame(Observed = heifer_ADFI$ADFI, Predicted = fitted(model_heifer_ADFI))
+#Plot observed vs prediceted
+par(mfrow=c(1,1))
+plot(OP_heifer_ADFI$Predicted, OP_heifer_ADFI$Observed, xlab="Predicted Average Daily Feed Intake (kg/d)", ylab="Observed Average Daily Feed Intake (kg/d)")
+OP=lm(Observed~Predicted, data=OP_heifer_ADFI)
+#summary(OP)
+abline(OP)
+
+#ADG for heifer cohort
+null_heifer_ADG=lm(ADG~1, data=heifer_ADG)
+#summary(null_heifer_ADG)
+full_heifer_ADG=lm(ADG~., data=heifer_ADG)
+#summary(full_heifer_ADG)
+step(null_heifer_ADG, scope=list(lower=null_heifer_ADG, upper=full_heifer_ADG), direction="forward")
+
+#Model ADG
+model_heifer_ADG <- lm(formula = ADG ~ OTU233 + OTU139 + OTU6532 + OTU125 + OTU2045 + OTU89, data = heifer_ADG)
+summary(model_heifer_ADG)
+#anova(model_heifer_ADG)
+#Test multi-collinearity (variance inflation factor)
+vif(model_heifer_ADG)
+sqrt(vif(model_heifer_ADG)) > 2
+#Homoscedasticity & Normality
+layout(matrix(c(1,2,3,4),2,2))
+plot(model_heifer_ADG)
+#Extract observed and predicted values
+OP_heifer_ADG <- data.frame(Observed = heifer_ADG$ADG, Predicted = fitted(model_heifer_ADG))
+#Plot observed vs prediceted
+par(mfrow=c(1,1))
+plot(OP_heifer_ADG$Predicted, OP_heifer_ADG$Observed, xlab="Predicted Average Daily Gain (kg/d)", ylab="Observed Average Daily Gain (kg/d)")
+OP=lm(Observed~Predicted, data=OP_heifer_ADG)
+#summary(OP)
+abline(OP)
+
+#FE for heifer cohort
+null_heifer_FE=lm(FE~1, data=heifer_FE)
+#summary(null_heifer_FE)
+full_heifer_FE=lm(FE~., data=heifer_FE)
+#summary(full_heifer_FE)
+step(null_heifer_FE, scope=list(lower=null_heifer_FE, upper=full_heifer_FE), direction="forward")
+
+#Model FE
+model_heifer_FE <- lm(formula = FE ~ OTU233 + OTU139 + OTU125 + OTU6532 + OTU2045 + OTU4675, data = heifer_FE)
+summary(model_heifer_FE)
+#anova(model_heifer_FE)
+#Test multi-collinearity (variance inflation factor)
+vif(model_heifer_FE)
+sqrt(vif(model_heifer_FE)) > 2
+#Homoscedasticity & Normality
+layout(matrix(c(1,2,3,4),2,2))
+plot(model_heifer_FE)
+#Extract observed and predicted values
+OP_heifer_FE <- data.frame(Observed = heifer_FE$FE, Predicted = fitted(model_heifer_FE))
+#Plot observed vs prediceted
+par(mfrow=c(1,1))
+plot(OP_heifer_FE$Predicted, OP_heifer_FE$Observed, xlab="Predicted Feed Efficiency (ADG/ADFI)", ylab="Observed Feed Efficiency (ADG/ADFI)")
+OP=lm(Observed~Predicted, data=OP_heifer_FE)
+#summary(OP)
+abline(OP)
+
+#Create data set for steer cohort 
+mapping_steer <- read.table("r_inputs/mapping_test_set_steer.txt", header=T, sep = "\t")
+row.names(mapping_steer) <- mapping_steer[,1]
+
+#Linear models for ADFI, ADG, and FE using breed composition as covariates for steer cohort
+lm_ADFI_steer <- lm(ADFI ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data = mapping_steer)
+ADFI_res_steer <- as.data.frame(resid(lm_ADFI_steer))
+lm_ADG_steer <- lm(ADG ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data = mapping_steer)
+gain_res_steer <- as.data.frame(resid(lm_gain_steer))
+lm_FE_steer <- lm(FE ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data = mapping_steer)
+FE_res_steer <- as.data.frame(resid(lm_FE_steer))
+
+#Data sets for heifer cohort
+steer_otus <- read.table("stepwise_reg/test_steer_final.txt", header=T, sep = "\t")
+row.names(steer_otus) <- steer_otus[,1]
+steer_otus <- steer_otus[,-1]
+steer_ADFI <- merge(ADFI_res_steer,steer_otus,by="row.names")
+steer_ADFI <- steer_ADFI[,-1]
+colnames(steer_ADFI)[1] <- "ADFI"
+steer_ADG <- merge(gain_res_steer,steer_otus,by="row.names")
+steer_ADG <- steer_ADG[,-1]
+colnames(steer_ADG)[1] <- "ADG"
+steer_FE <- merge(FE_res_steer,steer_otus,by="row.names")
+steer_FE <- steer_FE[,-1]
+colnames(steer_FE)[1] <- "FE"
+
+#Forward stepwise regression models for steer cohort
+
+#ADFI for seer cohort
+null_steer_ADFI=lm(ADFI~1, data=steer_ADFI)
+#summary(null_steer_ADFI)
+full_steer_ADFI=lm(ADFI~., data=steer_ADFI)
+#summary(full_steer_ADFI)
+step(null_steer_ADFI, scope=list(lower=null_steer_ADFI, upper=full_steer_ADFI), direction="forward")
+
+#Model ADFI
+model_steer_ADFI <- lm(formula = ADFI ~ OTU3879 + OTU103 + OTU88 + OTU50 + OTU25 + OTU252 + OTU301 + OTU1874 + OTU41 + OTU3670 + OTU2441, data = steer_ADFI)
+summary(model_steer_ADFI)
+#anova(model_steer_ADFI)
+#Test multi-collinearity (variance inflation factor)
+vif(model_steer_ADFI)
+sqrt(vif(model_steer_ADFI)) > 2
+#Homoscedasticity & Normality
+layout(matrix(c(1,2,3,4),2,2))
+plot(model_steer_ADFI)
+#Extract observed and predicted values
+OP_steer_ADFI <- data.frame(Observed = steer_ADFI$ADFI, Predicted = fitted(model_steer_ADFI))
+#Plot observed vs prediceted
+par(mfrow=c(1,1))
+plot(OP_steer_ADFI$Predicted, OP_steer_ADFI$Observed, xlab="Predicted Average Daily Feed Intake (kg/d)", ylab="Observed Average Daily Feed Intake (kg/d)")
+OP=lm(Observed~Predicted, data=OP_steer_ADFI)
+#summary(OP)
+abline(OP)
+
+#ADG for seer cohort
+null_steer_ADG=lm(ADG~1, data=steer_ADG)
+#summary(null_steer_ADG)
+full_steer_ADG=lm(ADG~., data=steer_ADG)
+#summary(full_steer_ADG)
+step(null_steer_ADG, scope=list(lower=null_steer_ADG, upper=full_steer_ADG), direction="forward")
+
+#Model ADG
+model_steer_ADG <- lm(formula = ADG ~ OTU3081 + OTU17 + OTU14 + OTU301 + OTU2441 + OTU60 + OTU65 + OTU87 + OTU9 + OTU218 + OTU50 + OTU227 + OTU738 + OTU3879 + OTU36, data = steer_ADG)
+summary(model_steer_ADG)
+#anova(model_steer_ADG)
+#Test multi-collinearity (variance inflation factor)
+vif(model_steer_ADG)
+sqrt(vif(model_steer_ADG)) > 2
+#Homoscedasticity & Normality
+layout(matrix(c(1,2,3,4),2,2))
+plot(model_steer_ADG)
+#Extract observed and predicted values
+OP_steer_ADG <- data.frame(Observed = steer_ADG$ADG, Predicted = fitted(model_steer_ADG))
+#Plot observed vs prediceted
+par(mfrow=c(1,1))
+plot(OP_steer_ADG$Predicted, OP_steer_ADG$Observed, xlab="Predicted Average Daily Gain (kg/d)", ylab="Observed Average Daily Gain (kg/d)")
+OP=lm(Observed~Predicted, data=OP_steer_ADG)
+#summary(OP)
+abline(OP)
+
+#FE for seer cohort
+null_steer_FE=lm(FE~1, data=steer_FE)
+#summary(null_steer_FE)
+full_steer_FE=lm(FE~., data=steer_FE)
+#summary(full_steer_FE)
+step(null_steer_FE, scope=list(lower=null_steer_FE, upper=full_steer_FE), direction="forward")
+
+#Model FE
+model_steer_FE <- lm(formula = FE ~ OTU41 + OTU60 + OTU12 + OTU4409 + OTU103 + OTU25 + OTU3879 + OTU218 + OTU3081 + OTU48 + OTU168, data = steer_FE)
+summary(model_steer_FE)
+#anova(model_steer_FE)
+#Test multi-collinearity (variance inflation factor)
+vif(model_steer_FE)
+sqrt(vif(model_steer_FE)) > 2
+#Homoscedasticity & Normality
+layout(matrix(c(1,2,3,4),2,2))
+plot(model_steer_FE)
+#Extract observed and predicted values
+OP_steer_FE <- data.frame(Observed = steer_FE$FE, Predicted = fitted(model_steer_FE))
+#Plot observed vs prediceted
+par(mfrow=c(1,1))
+plot(OP_steer_FE$Predicted, OP_steer_FE$Observed, xlab="Predicted Feed Efficiency (ADG/ADFI)", ylab="Observed Feed Efficiency (ADG/ADFI)")
+OP=lm(Observed~Predicted, data=OP_steer_FE)
+#summary(OP)
+abline(OP)
+
+#Validation heifer data sets
+validation_otus_heifer <- read.table("stepwise_reg/validation_heifer_final.txt", header=T, sep = "\t")
+row.names(validation_otus_heifer) <- validation_otus_heifer[,1]
+validation_otus_heifer <- validation_otus_heifer[,-1]
+validation_heifer_ADFI <- merge(ADFI_res_steer,validation_otus_heifer,by="row.names")
+validation_heifer_ADFI <- validation_heifer_ADFI[,-1]
+colnames(validation_heifer_ADFI)[1] <- "ADFI"
+validation_heifer_ADG <- merge(gain_res_steer,validation_otus_heifer,by="row.names")
+validation_heifer_ADG <- validation_heifer_ADG[,-1]
+colnames(validation_heifer_ADG)[1] <- "ADG"
+validation_heifer_FE <- merge(FE_res_steer,validation_otus_heifer,by="row.names")
+validation_heifer_FE <- validation_heifer_FE[,-1]
+colnames(validation_heifer_FE)[1] <- "FE"
+
+#Validation heifer models
+#Heifer ADFI
+modelval_heifer_ADFI <- lm(formula = ADFI ~ OTU233 + OTU6532 + OTU257 + OTU2045 + OTU125 + OTU517 + OTU5323 + OTU139 + OTU216 + OTU5133, data = validation_heifer_ADFI)
+summary(modelval_heifer_ADFI)
+
+#Heifer ADG
+modelval_heifer_ADG <- lm(formula = ADG ~ OTU233 + OTU139 + OTU6532 + OTU125 + OTU2045 + OTU89, data = validation_heifer_ADG)
+summary(modelval_heifer_ADG)
+
+#Heifer FE
+modelval_heifer_FE <- lm(formula = FE ~ OTU233 + OTU139 + OTU6532 + OTU125 + OTU2045 + OTU89, data = validation_heifer_FE)
+summary(modelval_heifer_FE)
+
+#Validation steer data sets
+validation_otus_steer <- read.table("stepwise_reg/validation_steer_final.txt", header=T, sep = "\t")
+row.names(validation_otus_steer) <- validation_otus_steer[,1]
+validation_otus_steer <- validation_otus_steer[,-1]
+validation_steer_ADFI <- merge(ADFI_res_heifer,validation_otus_steer,by="row.names")
+validation_steer_ADFI <- validation_steer_ADFI[,-1]
+colnames(validation_steer_ADFI)[1] <- "ADFI"
+validation_steer_ADG <- merge(gain_res_heifer,validation_otus_steer,by="row.names")
+validation_steer_ADG <- validation_steer_ADG[,-1]
+colnames(validation_steer_ADG)[1] <- "ADG"
+validation_steer_FE <- merge(FE_res_heifer,validation_otus_steer,by="row.names")
+validation_steer_FE <- validation_steer_FE[,-1]
+colnames(validation_steer_FE)[1] <- "FE"
+
+#Validation steer models
+#steer ADFI
+modelval_steer_ADFI <- lm(formula = ADFI ~ OTU3879 + OTU103 + OTU88 + OTU50 + OTU25 + OTU252 + OTU301 + OTU1874 + OTU41 + OTU3670 + OTU2441, data = validation_steer_ADFI)
+summary(modelval_steer_ADFI)
+
+#steer ADG
+modelval_steer_ADG <- lm(formula = ADG ~ OTU3081 + OTU17 + OTU14 + OTU301 + OTU2441 + OTU60 + OTU65 + OTU87 + OTU9 + OTU218 + OTU50 + OTU227 + OTU738 + OTU3879 + OTU36, data = validation_steer_ADG)
+summary(modelval_steer_ADG)
+
+#steer FE
+modelval_steer_FE <- lm(formula = FE ~ OTU41 + OTU60 + OTU12 + OTU4409 + OTU103 + OTU25 + OTU3879 + OTU218 + OTU3081 + OTU48 + OTU168, data = validation_steer_FE)
+summary(modelval_steer_FE)
+```

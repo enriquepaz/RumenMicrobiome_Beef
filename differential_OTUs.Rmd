@@ -6,7 +6,7 @@ Output:
     keep_md: yes
 ---
 
-The following transfromss the discovery OTU table from read counts to relative abundance and identifies differential abundant OTUs across feed efficiency phenotypes within heifer and steer cohorts using the linear discriminant analysis (LDA) effect size [LEfSe](https://www.ncbi.nlm.nih.gov/pubmed/21702898) method. 
+The following transforms the discovery OTU table from read counts to relative abundance and identifies differential abundant OTUs across feed efficiency phenotypes within heifer and steer cohorts using the linear discriminant analysis (LDA) effect size [LEfSe](https://www.ncbi.nlm.nih.gov/pubmed/21702898) method. 
 
 ## Transfrom discovery OTU table from read counts to relative abundance
 
@@ -152,7 +152,7 @@ write.table(steer_rel_ADGLADFIL_ADGHADFIL, file="relative_abundance_groups/steer
 
 ## Identify differential abundant OTUs across feed efficiency phenotypes within heifer and steer cohorts
 
-Results from LEfSe are provided in the Github [repository](https://github.com/enriquepaz/RumenMicrobiome_Beef) and were generated as described below.
+Results from LEfSe are provided in the Github [repository](https://github.com/enriquepaz/RumenMicrobiome_Beef) in the lefse_outputs directory and were generated as described below.
 
 ```{r, engine='bash', eval=FALSE}
 #Download LEfSe

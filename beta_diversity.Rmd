@@ -1,12 +1,12 @@
 ---
-Title: "Summarizes Taxa, Core Measurable Microbiome, Beta Diversity"
+Title: "Summarizes Taxa, Core Measurable Microbiome, Beta Diversity, PCoA plots"
 Author: Henry Paz (henry.paz@huskers.unl.edu)
 Output:
   html_document:
     keep_md: yes
 ---
 
-The following summarizes taxa, determines a core measurable microbiome, and calculates beta diversity within heifer and steer cohorts.
+The following summarizes taxa, determines a core measurable microbiome, calculates beta diversity, and generates Principal coordinate analysis (PCoA) plots within heifer and steer cohorts.
 
 ## Summarize taxa across samples within heifer and steer cohorts
 
@@ -193,11 +193,66 @@ dm_weighted_steer <- as.dist(dm_weighted_steer)
 adonis(dm_weighted_steer ~ Group, permutations=999, data=mapping_steer)
 ```
 
-## Make bipartite networks
-```{r, engine='bash'}
-#Bipartite network for heifer
-make_bipartite_network.py -i biom_files/final_core_discovery_heifer.biom -m split_by_sex/mapping_file_discovery__Sex_Heifer__.txt -k taxonomy --md_fields 'k,p,c,o,f,g,s' -o bipartite_network_heifer/ --scolors 'Group' --ocolors 'p' --osize 'Abundance'
+## PCoA plots
 
-#Bipartite network for steer
-make_bipartite_network.py -i biom_files/final_core_discovery_steer.biom -m split_by_sex/mapping_file_discovery__Sex_Steer__.txt -k taxonomy --md_fields 'k,p,c,o,f,g,s' -o bipartite_network_steer/ --scolors 'Group' --ocolors 'p' --osize 'Abundance'
+```{r, engine='bash'}
+#Load packages
+library(ggplot2)
+
+#Create data set for heifer cohort
+unifrac_heifer <- read.table("beta_div_core_discovery_heifer/weighted_unifrac_pc.txt", sep="\t", skip=9, nrows=16)
+pc_vectors <- unifrac_heifer[, c("V1", "V2", "V3")]
+colnames(pc_vectors) <- c("Sample", "PC1", "PC2")
+
+mapping_heifer <- read.table("r_inputs/mapping_file_discovery__Sex_Heifer__.txt", sep="\t", header=T, stringsAsFactors=F)
+subset_heifer <- mapping_heifer[,c("Sample","Group")]
+
+pcoa_data <- merge(pc_vectors, subset_heifer,by="Sample")
+
+#Generate PCoA plot
+pcoa_plot_heifer <- ggplot(pcoa_data, aes(x=PC1, y=PC2, shape=Group, color=Group)) + geom_point(size=2.5) + labs(title="Heifer Cohort", x="PC1 (30.9%)", y="PC2 (20.4%)", shape="Feed Efficiency Phennotype", color="Feed Efficiency Phennotype") + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.title=element_text(color="black", size=10, face="bold"), legend.text=element_text(color="black", size=9, face="bold")) + scale_shape_manual(values=c(15, 16, 17, 8)) + scale_colour_manual(values=c("#FF00FF", "#FF0000", "#000080", "#008000"))
+
+#Create data set for steer cohort
+unifrac_steer <- read.table("beta_div_core_discovery_steer/weighted_unifrac_pc.txt", sep="\t", skip=9, nrows=16)
+pc_vectors <- unifrac_steer[, c("V1", "V2", "V3")]
+colnames(pc_vectors) <- c("Sample", "PC1", "PC2")
+
+mapping_steer <- read.table("r_inputs/mapping_file_discovery__Sex_Steer__.txt", sep="\t", header=T, stringsAsFactors=F)
+subset_steer <- mapping_steer[,c("Sample","Group")]
+
+pcoa_data <- merge(pc_vectors, subset_steer,by="Sample")
+
+#Generate PCoA plot
+pcoa_plot_steer <- ggplot(pcoa_data, aes(x=PC1, y=PC2, shape=Group, color=Group)) + geom_point(size=2.5) + labs(title="Steer Cohort", x="PC1 (50.2%)", y="PC2 (16.5%)", shape="Feed Efficiency Phennotype", color="Feed Efficiency Phennotype") + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.title=element_text(color="black", size=10, face="bold"), legend.text=element_text(color="black", size=9, face="bold")) + scale_shape_manual(values=c(15, 16, 17, 8)) + scale_colour_manual(values=c("#FF00FF", "#FF0000", "#000080", "#008000"))
+
+#Multiplot function
+multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
+  library(grid)
+  plots <- c(list(...), plotlist)
+  numPlots = length(plots)
+  if (is.null(layout)) {
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)), ncol = cols, 
+                     nrow = ceiling(numPlots/cols))
+  }
+  if (numPlots == 1) {
+    print(plots[[1]])
+  } else {
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    for (i in 1:numPlots) {
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row, layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+#Generate figures
+png("figures/Figure2.png", units="in", height=6, width=12, res=300)
+multiplot(pcoa_plot_heifer, pcoa_plot_steer, cols=2)
+dev.off()
+
+pdf("figures/Figure2.pdf", height=6, width=12)
+multiplot(pcoa_plot_heifer, pcoa_plot_steer, cols=2)
+dev.off()
 ```

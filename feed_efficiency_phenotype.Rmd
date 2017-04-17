@@ -59,7 +59,7 @@ mapping_subset <- mapping_file[,c("Sample","Sex")]
 pcoa_data <- merge(pc_vectors, mapping_subset,by="Sample")
 
 #Generate PCoA plot
-pcoa_plot_full <- ggplot(pcoa_data, aes(x=PC1, y=PC2, color=Sex)) + geom_point(size=2.5) + labs(x="PC1 (47.1%)", y="PC2 (14.3%)") + theme(axis.line=element_line(color = "black", size = 1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.title=element_blank(), legend.text=element_text(color="black", size=10, face="bold"))
+pcoa_plot_full <- ggplot(pcoa_data, aes(x=PC1, y=PC2, color=Sex)) + geom_point(size=2.5) + labs(x="PC1 (47.1%)", y="PC2 (14.3%)", color="Cohort") + theme(axis.line=element_line(color = "black", size = 1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.title=element_text(color="black", size=12, face="bold"), legend.text=element_text(color="black", size=10, face="bold")) +  scale_color_manual(values=c("#FF0000","#0000FF"))
 
 #Make figures directory
 dir.create("figures")
@@ -188,9 +188,9 @@ data_long_heifer <- gather(residuals_data_heifer, measure, residual, ADFI_res_he
 data_long_steer <- gather(residuals_data_steer, measure, residual, ADFI_res_steer:ADG_res_steer)
 
 #Generate boxplots
-boxplot_heifer <- ggplot(data_long_heifer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color="#FF0000") + geom_jitter() + labs(title="Outliers Heifer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
+boxplot_heifer <- ggplot(data_long_heifer, aes(x=measure, y=residual)) + geom_boxplot() + geom_jitter() + labs(title="Heifer Cohort", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
 
-boxplot_steer <- ggplot(data_long_steer, aes(x=measure, y=residual)) + geom_boxplot(outlier.color="#FF0000") + geom_jitter() + labs(title="Outliers Steer", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
+boxplot_steer <- ggplot(data_long_steer, aes(x=measure, y=residual)) + geom_boxplot() + geom_jitter() + labs(title="Steer Cohort", x="Measure", y="Residuals (kg/d)") + scale_x_discrete(labels=c("Average Daily Feed Intake", "Average Daily Gain")) + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"))
 
 #Multiplot function
 multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
