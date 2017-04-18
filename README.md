@@ -33,7 +33,11 @@ Anaconda is downloaded and prompts you during installataion of the packages. The
 
 **Render an R Markdown file**
 
-To render one of the R Markdown files: R CMD BATCH --no-restore --no-save '--args file1.Rmd' render.R
+source anaconda/bin/activate qiimemothur
+
+anaconda/envs/r/bin/Rscript -e "rmarkdown::render('file[1-8].Rmd')"
+
+
 
 
 
