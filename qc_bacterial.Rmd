@@ -1,10 +1,12 @@
 ---
-Title: "Assign Taxonomy, Customize Alignment Database, Align Sequences, Quality Control"
+Title: "Assign Taxonomy, Customize Alignment Database, Align Sequences, Quality Filtering"
 Author: Henry Paz (henry.paz@huskers.unl.edu)
 Output:
   html_document:
     keep_md: yes
 ---
+
+The following assigns taxonomy to representative sequences using the Greengenes database, customizes the SILVA reference alignment to the V4 region, aligns sequences, and performs quality filtering (removes sequences with poor alignment, sinlgetons, and classified within the Archaea kingdom or Cyanobacteria phylum.)
 
 ## Assign taxonomy to OTUs
 

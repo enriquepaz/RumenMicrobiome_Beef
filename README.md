@@ -31,7 +31,7 @@ Anaconda is downloaded and prompts you during installataion of the packages. The
 - No to prepend anaconda to your path. Choosing yes should not impact the installation.
 - Will be asked a few times if you wish to proceed with installing the packages...agree to it.
 
-**Render an R Markdown file**
+**Render R Markdown files**
 
 - source anaconda/bin/activate qiimemothur
 - anaconda/envs/r/bin/Rscript -e "rmarkdown::render('file[1-8].Rmd')"
