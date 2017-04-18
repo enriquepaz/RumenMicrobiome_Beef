@@ -33,9 +33,8 @@ Anaconda is downloaded and prompts you during installataion of the packages. The
 
 **Render an R Markdown file**
 
-source anaconda/bin/activate qiimemothur
-
-anaconda/envs/r/bin/Rscript -e "rmarkdown::render('file[1-8].Rmd')"
+- source anaconda/bin/activate qiimemothur
+- anaconda/envs/r/bin/Rscript -e "rmarkdown::render('file[1-8].Rmd')"
 
 
 
