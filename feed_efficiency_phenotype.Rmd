@@ -96,6 +96,13 @@ dm_weighted_full <- as.dist(dm_weighted_full)
 adonis(dm_weighted_full ~ Sex, permutations=999, data=map_full)
 ```
 
+## Bipartite network
+
+```{r, engine='bash'}
+#Generated bipartite network can be visualized in Cystoscape (Figure1)
+make_bipartite_network.py -i biom_files/otu_table_final_rarefied.biom -m mapping_files/mapping_file.txt -k taxonomy --md_fields 'k,p,c,o,f,g,s' -o bipartite_network_cohorts/ --scolors 'Sex' --ocolors 'p' --osize 'Abundance'
+```
+
 ## Regression approach to determine feed efficiency phenotype within cohort (heifer and steer)
 
 ```{r}
@@ -261,17 +268,17 @@ heifer_plot <- ggplot(residuals_data_heifer, aes(x=ADFI_res_heifer, y=ADG_res_he
 #Steer feed efficiency phenotype plot
 steer_plot <- ggplot(residuals_data_steer, aes(x=ADFI_res_steer, y=ADG_res_steer, color=Selected)) + geom_point(size=2.5) + geom_hline(yintercept=0, linetype="dashed", color="black", size=1) + geom_vline(xintercept=0, linetype="dashed", color="black", size=1) + labs(title="Steer Cohort", x="Average Daily Feed Intake Residuals (kg/d)", y="Average Daily Gain Residuals (kg/d)") + theme(plot.title=element_text(color="black", size=12, face="bold", hjust=0.5), axis.line=element_line(color="black", size=1), axis.ticks=element_line(color="black"), axis.text=element_text(color="black", size=12, face="bold"), axis.title=element_text(color="black", size=12, face="bold"), legend.position="none") + scale_color_manual(values = c("#000000", "#FF0000"))
 
-png("figures/Figure1.png", units="in", height=6, width=12, res=300)
+png("figures/Figure2.png", units="in", height=6, width=12, res=300)
 multiplot(heifer_plot, steer_plot, cols=2)
 dev.off()
 
-pdf("figures/Figure1.pdf", height=6, width=12)
+pdf("figures/Figure2.pdf", height=6, width=12)
 multiplot(heifer_plot, steer_plot, cols=2)
 dev.off()
 ```
 ![Boxplot Outliers](figures/FigureS2.png)
 
-![Feed Efficiency Phenotype](figures/Figure1.png)
+![Feed Efficiency Phenotype](figures/Figure2.png)
 
 ## Subset discovery set
 
@@ -281,6 +288,9 @@ printf "S241\nS254\nS256\nS272\nS281\nS288\nS295\nS303\nS308\nS313\nS346\nS347\n
 
 #Subset discovery OTU table
 filter_samples_from_otu_table.py -i biom_files/otu_table_final.biom -o biom_files/otu_table_discovery.biom --sample_id_fp filter_files/samples_ids_selected.txt
+
+#Subset discovery mapping file
+grep -E "#SampleID|Yes" mapping_files/mapping_file.txt > mapping_files/mapping_file_discovery.txt
 
 #Split discovery OTU table by cohort (heifer and steer)
 split_otu_table.py -i biom_files/otu_table_discovery.biom -o split_by_sex -m mapping_files/mapping_file_discovery.txt -f Sex
