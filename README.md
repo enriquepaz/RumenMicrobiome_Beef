@@ -1,7 +1,7 @@
 :computer: :bar_chart:
 Analyses to recreate the results in the manuscript **"Rumen bacterial community structure impacts feed efficiency in beef cattle"** by Paz et al. 2017 in ISME J. The analyses are separated into several R Markdown files.
 
-Follow the instructions below to setup the same environment used to analyze the data and render the R Markdown files. Adhere to the delineated order as succeeding R Markdown files depend on previous results.
+Follow the instructions below to setup the same environment used to analyze the data and render the R Markdown files. Adhere to the delineated order as succeeding R Markdown files depend on previous results. If working in a server, setup X11 forwarding.
 
     1. data_curation.Rmd
 	2. generate_OTU_table.Rmd

@@ -1,12 +1,12 @@
 ---
-Title: "Relative Abundance OTU table, Differential Abundant OTUs"
+Title: "Relative Abundance OTU table, Differentially Abundant OTUs, Bipartite Network, Heatmaps"
 Author: Henry Paz (henry.paz@huskers.unl.edu)
 Output:
   html_document:
     keep_md: yes
 ---
 
-The following transforms the discovery OTU table from read counts to relative abundance and identifies differential abundant OTUs across feed efficiency phenotypes within heifer and steer cohorts using the linear discriminant analysis (LDA) effect size [LEfSe](https://www.ncbi.nlm.nih.gov/pubmed/21702898) method. 
+The following transforms the discovery OTU table for heifer and steer cohorts from read counts to relative abundance, identifies significant differentially abundant OTUs across feed efficiency phenotypes within heifer and steer cohorts using the linear discriminant analysis (LDA) effect size [LEfSe](https://www.ncbi.nlm.nih.gov/pubmed/21702898) method, generates a bipartite network of total significant differentially abundant OTUs for both cohorts, and creates heatmaps of significant differentially abundant OTUs within heifer and steer cohorts.
 
 ## Transfrom discovery OTU table from read counts to relative abundance
 
@@ -85,30 +85,19 @@ heifer_rel_abundance <- rbind(heifer_rel2, heifer_rel)
 
 #Create data sets for pairwise comparisons across feed efficiency phenotypes
 heifer_rel_ADGLADFIH_ADGHADFIH <- heifer_rel_abundance[,c("S712", "S713", "S680", "S694", "S380", "S382", "S303", "S346")]
-
 heifer_rel_ADGLADFIH_ADGLADFIL <- heifer_rel_abundance[,c("S712", "S713", "S680", "S694", "S567", "S673", "S715", "S347")]
-
 heifer_rel_ADGLADFIH_ADGHADFIL <- heifer_rel_abundance[,c("S712", "S713", "S680", "S694", "S308", "S313", "S295", "S357")]
-
 heifer_rel_ADGHADFIH_ADGLADFIL <- heifer_rel_abundance[,c("S380", "S382", "S303", "S346", "S567", "S673", "S715", "S347")]
-
 heifer_rel_ADGHADFIH_ADGHADFIL <- heifer_rel_abundance[,c("S380", "S382", "S303", "S346", "S308", "S313", "S295", "S357")]
-
 heifer_rel_ADGLADFIL_ADGHADFIL <- heifer_rel_abundance[,c("S567", "S673", "S715", "S347", "S308", "S313", "S295", "S357")]
 
 #Pairwise comparisons files
 write.table(heifer_rel_abundance, file="relative_abundance_groups/heifer_rel_abundance.txt", sep="\t", col.names=F, row.names=T, quote=F)
-
 write.table(heifer_rel_ADGLADFIH_ADGHADFIH, file="relative_abundance_groups/heifer_rel_ADGLADFIH_ADGHADFIH.txt", sep ="\t", col.names=F, row.names=T, quote=F)
-
 write.table(heifer_rel_ADGLADFIH_ADGLADFIL, file="relative_abundance_groups/heifer_rel_ADGLADFIH_ADGLADFIL.txt", sep ="\t", col.names=F, row.names=T, quote=F)
-
 write.table(heifer_rel_ADGLADFIH_ADGHADFIL, file="relative_abundance_groups/heifer_rel_ADGLADFIH_ADGHADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
-
 write.table(heifer_rel_ADGHADFIH_ADGLADFIL, file="relative_abundance_groups/heifer_rel_ADGHADFIH_ADGLADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
-
 write.table(heifer_rel_ADGHADFIH_ADGHADFIL, file="relative_abundance_groups/heifer_rel_ADGHADFIH_ADGHADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
-
 write.table(heifer_rel_ADGLADFIL_ADGHADFIL, file="relative_abundance_groups/heifer_rel_ADGLADFIL_ADGHADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
 
 #Create data set for steer cohort
@@ -123,34 +112,23 @@ steer_rel_abundance <- rbind(steer_rel2, steer_rel)
 
 #Create data sets for pairwise comparisons across feed efficiency phenotypes
 steer_rel_ADGLADFIH_ADGHADFIH <- steer_rel_abundance[,c("S525", "S272", "S510", "S288", "S527", "S254", "S512", "S497")]
-
 steer_rel_ADGLADFIH_ADGLADFIL <- steer_rel_abundance[,c("S525", "S272", "S510", "S288", "S256", "S485", "S281", "S486")]
-
 steer_rel_ADGLADFIH_ADGHADFIL <- steer_rel_abundance[,c("S525", "S272", "S510", "S288", "S562", "S518", "S524", "S241")]
-
 steer_rel_ADGHADFIH_ADGLADFIL <- steer_rel_abundance[,c("S527", "S254", "S512", "S497", "S256", "S485", "S281", "S486")]
-
 steer_rel_ADGHADFIH_ADGHADFIL <- steer_rel_abundance[,c("S527", "S254", "S512", "S497", "S562", "S518", "S524", "S241")]
-
 steer_rel_ADGLADFIL_ADGHADFIL <- steer_rel_abundance[,c("S256", "S485", "S281", "S486", "S562", "S518", "S524", "S241")]
 
 #Pairwise comparisons files
 write.table(steer_rel_abundance, file="relative_abundance_groups/steer_rel_abundance.txt", sep="\t", col.names=F, row.names=T, quote=F)
-
 write.table(steer_rel_ADGLADFIH_ADGHADFIH, file="relative_abundance_groups/steer_rel_ADGLADFIH_ADGHADFIH.txt", sep="\t", col.names=F, row.names=T,  quote=F)
-
 write.table(steer_rel_ADGLADFIH_ADGLADFIL, file="relative_abundance_groups/steer_rel_ADGLADFIH_ADGLADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
-
 write.table(steer_rel_ADGLADFIH_ADGHADFIL, file="relative_abundance_groups/steer_rel_ADGLADFIH_ADGHADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
-
 write.table(steer_rel_ADGHADFIH_ADGLADFIL, file="relative_abundance_groups/steer_rel_ADGHADFIH_ADGLADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
-
 write.table(steer_rel_ADGHADFIH_ADGHADFIL, file="relative_abundance_groups/steer_rel_ADGHADFIH_ADGHADFIL.txt", sep = "\t", col.names=F, row.names=T, quote=F)
-
 write.table(steer_rel_ADGLADFIL_ADGHADFIL, file="relative_abundance_groups/steer_rel_ADGLADFIL_ADGHADFIL.txt", sep="\t", col.names=F, row.names=T, quote=F)
 ```
 
-## Identify differential abundant OTUs across feed efficiency phenotypes within heifer and steer cohorts
+## Identify differentially abundant OTUs across feed efficiency phenotypes within heifer and steer cohorts
 
 Results from LEfSe are provided in the Github [repository](https://github.com/enriquepaz/RumenMicrobiome_Beef) in the lefse_outputs directory and were generated as described below.
 
@@ -202,7 +180,7 @@ python lefse/format_input.py relative_abundance_groups/steer_rel_ADGLADFIL_ADGHA
 python lefse/run_lefse.py lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_format.txt lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt
 ```
 
-Subset differential abundant OTUs from pairwise comparisons.
+## Subset significant differentially abundant OTUs from pairwise comparisons.
 
 ```{r}
 #Create directory
@@ -213,92 +191,296 @@ heifer_ADGLADFIH_ADGHADFIH_lefse <- read.table("lefse_outputs/heifer_rel_ADGLADF
 heifer_ADGLADFIH_ADGHADFIH_lefse <- heifer_ADGLADFIH_ADGHADFIH_lefse[complete.cases(heifer_ADGLADFIH_ADGHADFIH_lefse), ]
 heifer_ADGLADFIH_ADGHADFIH_lefse$V1 <- gsub("OTU", "", heifer_ADGLADFIH_ADGHADFIH_lefse$V1)
 heifer_ADGLADFIH_ADGHADFIH_lefse <- heifer_ADGLADFIH_ADGHADFIH_lefse[order(-heifer_ADGLADFIH_ADGHADFIH_lefse$V4),]
-heifer_ADGLADFIH_ADGHADFIH_lefse <- heifer_ADGLADFIH_ADGHADFIH_lefse[1:10,]
-write.table(heifer_ADGLADFIH_ADGHADFIH_lefse$V1, file="differential_otus/heifer_ADGLADFIH_ADGHADFIH_lefse.txt", col.names=F, row.names=F, quote=F)
+heifer_ADGLADFIH_ADGHADFIH_lefse_subset <- heifer_ADGLADFIH_ADGHADFIH_lefse[1:10,]
+write.table(heifer_ADGLADFIH_ADGHADFIH_lefse$V1, file="differential_otus/heifer_ADGLADFIH_ADGHADFIH_lefse_total.txt", col.names=F, row.names=F, quote=F)
+write.table(heifer_ADGLADFIH_ADGHADFIH_lefse_subset$V1, file="differential_otus/heifer_ADGLADFIH_ADGHADFIH_lefse_subset.txt", col.names=F, row.names=F, quote=F)
 
 heifer_ADGLADFIH_ADGLADFIL_lefse <- read.table("lefse_outputs/heifer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt", sep="\t", header=F)
 heifer_ADGLADFIH_ADGLADFIL_lefse <- heifer_ADGLADFIH_ADGLADFIL_lefse[complete.cases(heifer_ADGLADFIH_ADGLADFIL_lefse), ]
 heifer_ADGLADFIH_ADGLADFIL_lefse$V1 <- gsub("OTU", "", heifer_ADGLADFIH_ADGLADFIL_lefse$V1)
 heifer_ADGLADFIH_ADGLADFIL_lefse <- heifer_ADGLADFIH_ADGLADFIL_lefse[order(-heifer_ADGLADFIH_ADGLADFIL_lefse$V4),]
-heifer_ADGLADFIH_ADGLADFIL_lefse <- heifer_ADGLADFIH_ADGLADFIL_lefse[1:10,]
-write.table(heifer_ADGLADFIH_ADGLADFIL_lefse$V1, file="differential_otus/heifer_ADGLADFIH_ADGLADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+heifer_ADGLADFIH_ADGLADFIL_lefse_subset <- heifer_ADGLADFIH_ADGLADFIL_lefse[1:10,]
+write.table(heifer_ADGLADFIH_ADGLADFIL_lefse$V1, file="differential_otus/heifer_ADGLADFIH_ADGLADFIL_lefse_total.txt", col.names=F, row.names=F, quote=F)
+write.table(heifer_ADGLADFIH_ADGLADFIL_lefse_subset$V1, file="differential_otus/heifer_ADGLADFIH_ADGLADFIL_lefse_subset.txt", col.names=F, row.names=F, quote=F)
 
 heifer_ADGLADFIH_ADGHADFIL_lefse <- read.table("lefse_outputs/heifer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt", sep="\t", header=F)
 heifer_ADGLADFIH_ADGHADFIL_lefse <- heifer_ADGLADFIH_ADGHADFIL_lefse[complete.cases(heifer_ADGLADFIH_ADGHADFIL_lefse), ]
 heifer_ADGLADFIH_ADGHADFIL_lefse$V1 <- gsub("OTU", "", heifer_ADGLADFIH_ADGHADFIL_lefse$V1)
 heifer_ADGLADFIH_ADGHADFIL_lefse <- heifer_ADGLADFIH_ADGHADFIL_lefse[order(-heifer_ADGLADFIH_ADGHADFIL_lefse$V4),]
-heifer_ADGLADFIH_ADGHADFIL_lefse <- heifer_ADGLADFIH_ADGHADFIL_lefse[1:10,]
-write.table(heifer_ADGLADFIH_ADGHADFIL_lefse$V1, file="differential_otus/heifer_ADGLADFIH_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+heifer_ADGLADFIH_ADGHADFIL_lefse_subset <- heifer_ADGLADFIH_ADGHADFIL_lefse[1:10,]
+write.table(heifer_ADGLADFIH_ADGHADFIL_lefse$V1, file="differential_otus/heifer_ADGLADFIH_ADGHADFIL_lefse_total.txt", col.names=F, row.names=F, quote=F)
+write.table(heifer_ADGLADFIH_ADGHADFIL_lefse_subset$V1, file="differential_otus/heifer_ADGLADFIH_ADGHADFIL_lefse_subset.txt", col.names=F, row.names=F, quote=F)
 
 heifer_ADGHADFIH_ADGLADFIL_lefse <- read.table("lefse_outputs/heifer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt", sep="\t", header=F)
 heifer_ADGHADFIH_ADGLADFIL_lefse <- heifer_ADGHADFIH_ADGLADFIL_lefse[complete.cases(heifer_ADGHADFIH_ADGLADFIL_lefse), ]
 heifer_ADGHADFIH_ADGLADFIL_lefse$V1 <- gsub("OTU", "", heifer_ADGHADFIH_ADGLADFIL_lefse$V1)
 heifer_ADGHADFIH_ADGLADFIL_lefse <- heifer_ADGHADFIH_ADGLADFIL_lefse[order(-heifer_ADGHADFIH_ADGLADFIL_lefse$V4),]
-heifer_ADGHADFIH_ADGLADFIL_lefse <- heifer_ADGHADFIH_ADGLADFIL_lefse[1:10,]
-write.table(heifer_ADGHADFIH_ADGLADFIL_lefse$V1, file="differential_otus/heifer_ADGHADFIH_ADGLADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+heifer_ADGHADFIH_ADGLADFIL_lefse_subset <- heifer_ADGHADFIH_ADGLADFIL_lefse[1:10,]
+write.table(heifer_ADGHADFIH_ADGLADFIL_lefse$V1, file="differential_otus/heifer_ADGHADFIH_ADGLADFIL_lefse_total.txt", col.names=F, row.names=F, quote=F)
+write.table(heifer_ADGHADFIH_ADGLADFIL_lefse_subset$V1, file="differential_otus/heifer_ADGHADFIH_ADGLADFIL_lefse_subset.txt", col.names=F, row.names=F, quote=F)
 
 heifer_ADGHADFIH_ADGHADFIL_lefse <- read.table("lefse_outputs/heifer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt", sep="\t", header=F)
 heifer_ADGHADFIH_ADGHADFIL_lefse <- heifer_ADGHADFIH_ADGHADFIL_lefse[complete.cases(heifer_ADGHADFIH_ADGHADFIL_lefse), ]
 heifer_ADGHADFIH_ADGHADFIL_lefse$V1 <- gsub("OTU", "", heifer_ADGHADFIH_ADGHADFIL_lefse$V1)
 heifer_ADGHADFIH_ADGHADFIL_lefse <- heifer_ADGHADFIH_ADGHADFIL_lefse[order(-heifer_ADGHADFIH_ADGHADFIL_lefse$V4),]
-heifer_ADGHADFIH_ADGHADFIL_lefse <- heifer_ADGHADFIH_ADGHADFIL_lefse[1:10,]
-write.table(heifer_ADGHADFIH_ADGHADFIL_lefse$V1, file="differential_otus/heifer_ADGHADFIH_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+heifer_ADGHADFIH_ADGHADFIL_lefse_subset <- heifer_ADGHADFIH_ADGHADFIL_lefse[1:10,]
+write.table(heifer_ADGHADFIH_ADGHADFIL_lefse$V1, file="differential_otus/heifer_ADGHADFIH_ADGHADFIL_lefse_total.txt", col.names=F, row.names=F, quote=F)
+write.table(heifer_ADGHADFIH_ADGHADFIL_lefse_subset$V1, file="differential_otus/heifer_ADGHADFIH_ADGHADFIL_lefse_subset.txt", col.names=F, row.names=F, quote=F)
 
 heifer_ADGLADFIL_ADGHADFIL_lefse <- read.table("lefse_outputs/heifer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt", sep="\t", header=F)
 heifer_ADGLADFIL_ADGHADFIL_lefse <- heifer_ADGLADFIL_ADGHADFIL_lefse[complete.cases(heifer_ADGLADFIL_ADGHADFIL_lefse), ]
 heifer_ADGLADFIL_ADGHADFIL_lefse$V1 <- gsub("OTU", "", heifer_ADGLADFIL_ADGHADFIL_lefse$V1)
 heifer_ADGLADFIL_ADGHADFIL_lefse <- heifer_ADGLADFIL_ADGHADFIL_lefse[order(-heifer_ADGLADFIL_ADGHADFIL_lefse$V4),]
-heifer_ADGLADFIL_ADGHADFIL_lefse <- heifer_ADGLADFIL_ADGHADFIL_lefse[1:10,]
-write.table(heifer_ADGLADFIL_ADGHADFIL_lefse$V1, file="differential_otus/heifer_ADGLADFIL_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+heifer_ADGLADFIL_ADGHADFIL_lefse_subset <- heifer_ADGLADFIL_ADGHADFIL_lefse[1:10,]
+write.table(heifer_ADGLADFIL_ADGHADFIL_lefse$V1, file="differential_otus/heifer_ADGLADFIL_ADGHADFIL_lefse_total.txt", col.names=F, row.names=F, quote=F)
+write.table(heifer_ADGLADFIL_ADGHADFIL_lefse_subset$V1, file="differential_otus/heifer_ADGLADFIL_ADGHADFIL_lefse_subset.txt", col.names=F, row.names=F, quote=F)
 
 #Create lists of differential OTUs across pairwise comparisons within steer cohort
 steer_ADGLADFIH_ADGHADFIH_lefse <- read.table("lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIH_lefse_result.txt", sep="\t", header=F)
 steer_ADGLADFIH_ADGHADFIH_lefse <- steer_ADGLADFIH_ADGHADFIH_lefse[complete.cases(steer_ADGLADFIH_ADGHADFIH_lefse), ]
 steer_ADGLADFIH_ADGHADFIH_lefse$V1 <- gsub("OTU", "", steer_ADGLADFIH_ADGHADFIH_lefse$V1)
 steer_ADGLADFIH_ADGHADFIH_lefse <- steer_ADGLADFIH_ADGHADFIH_lefse[order(-steer_ADGLADFIH_ADGHADFIH_lefse$V4),]
-steer_ADGLADFIH_ADGHADFIH_lefse <- steer_ADGLADFIH_ADGHADFIH_lefse[1:10,]
-write.table(steer_ADGLADFIH_ADGHADFIH_lefse$V1, file="differential_otus/steer_ADGLADFIH_ADGHADFIH_lefse.txt", col.names=F, row.names=F, quote=F)
+steer_ADGLADFIH_ADGHADFIH_lefse_subset <- steer_ADGLADFIH_ADGHADFIH_lefse[1:10,]
+write.table(steer_ADGLADFIH_ADGHADFIH_lefse$V1, file="differential_otus/steer_ADGLADFIH_ADGHADFIH_lefse_total.txt", col.names=F, row.names=F, quote=F)
+write.table(steer_ADGLADFIH_ADGHADFIH_lefse_subset$V1, file="differential_otus/steer_ADGLADFIH_ADGHADFIH_lefse_subset.txt", col.names=F, row.names=F, quote=F)
 
 steer_ADGLADFIH_ADGLADFIL_lefse <- read.table("lefse_outputs/steer_rel_ADGLADFIH_ADGLADFIL_lefse_result.txt", sep="\t", header=F)
 steer_ADGLADFIH_ADGLADFIL_lefse <- steer_ADGLADFIH_ADGLADFIL_lefse[complete.cases(steer_ADGLADFIH_ADGLADFIL_lefse), ]
 steer_ADGLADFIH_ADGLADFIL_lefse$V1 <- gsub("OTU", "", steer_ADGLADFIH_ADGLADFIL_lefse$V1)
 steer_ADGLADFIH_ADGLADFIL_lefse <- steer_ADGLADFIH_ADGLADFIL_lefse[order(-steer_ADGLADFIH_ADGLADFIL_lefse$V4),]
-steer_ADGLADFIH_ADGLADFIL_lefse <- steer_ADGLADFIH_ADGLADFIL_lefse[1:10,]
-write.table(steer_ADGLADFIH_ADGLADFIL_lefse$V1, file="differential_otus/steer_ADGLADFIH_ADGLADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+steer_ADGLADFIH_ADGLADFIL_lefse_subset <- steer_ADGLADFIH_ADGLADFIL_lefse[1:10,]
+write.table(steer_ADGLADFIH_ADGLADFIL_lefse$V1, file="differential_otus/steer_ADGLADFIH_ADGLADFIL_lefse_total.txt", col.names=F, row.names=F, quote=F)
+write.table(steer_ADGLADFIH_ADGLADFIL_lefse_subset$V1, file="differential_otus/steer_ADGLADFIH_ADGLADFIL_lefse_subset.txt", col.names=F, row.names=F, quote=F)
 
 steer_ADGLADFIH_ADGHADFIL_lefse <- read.table("lefse_outputs/steer_rel_ADGLADFIH_ADGHADFIL_lefse_result.txt", sep="\t", header=F)
 steer_ADGLADFIH_ADGHADFIL_lefse <- steer_ADGLADFIH_ADGHADFIL_lefse[complete.cases(steer_ADGLADFIH_ADGHADFIL_lefse), ]
 steer_ADGLADFIH_ADGHADFIL_lefse$V1 <- gsub("OTU", "", steer_ADGLADFIH_ADGHADFIL_lefse$V1)
 steer_ADGLADFIH_ADGHADFIL_lefse <- steer_ADGLADFIH_ADGHADFIL_lefse[order(-steer_ADGLADFIH_ADGHADFIL_lefse$V4),]
-steer_ADGLADFIH_ADGHADFIL_lefse <- steer_ADGLADFIH_ADGHADFIL_lefse[1:10,]
-write.table(steer_ADGLADFIH_ADGHADFIL_lefse$V1, file="differential_otus/steer_ADGLADFIH_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+steer_ADGLADFIH_ADGHADFIL_lefse_subset <- steer_ADGLADFIH_ADGHADFIL_lefse[1:10,]
+write.table(steer_ADGLADFIH_ADGHADFIL_lefse$V1, file="differential_otus/steer_ADGLADFIH_ADGHADFIL_lefse_total.txt", col.names=F, row.names=F, quote=F)
+write.table(steer_ADGLADFIH_ADGHADFIL_lefse_subset$V1, file="differential_otus/steer_ADGLADFIH_ADGHADFIL_lefse_subset.txt", col.names=F, row.names=F, quote=F)
 
 steer_ADGHADFIH_ADGLADFIL_lefse <- read.table("lefse_outputs/steer_rel_ADGHADFIH_ADGLADFIL_lefse_result.txt", sep="\t", header=F)
 steer_ADGHADFIH_ADGLADFIL_lefse <- steer_ADGHADFIH_ADGLADFIL_lefse[complete.cases(steer_ADGHADFIH_ADGLADFIL_lefse), ]
 steer_ADGHADFIH_ADGLADFIL_lefse$V1 <- gsub("OTU", "", steer_ADGHADFIH_ADGLADFIL_lefse$V1)
 steer_ADGHADFIH_ADGLADFIL_lefse <- steer_ADGHADFIH_ADGLADFIL_lefse[order(-steer_ADGHADFIH_ADGLADFIL_lefse$V4),]
-steer_ADGHADFIH_ADGLADFIL_lefse <- steer_ADGHADFIH_ADGLADFIL_lefse[1:10,]
-write.table(steer_ADGHADFIH_ADGLADFIL_lefse$V1, file="differential_otus/steer_ADGHADFIH_ADGLADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+steer_ADGHADFIH_ADGLADFIL_lefse_subset <- steer_ADGHADFIH_ADGLADFIL_lefse[1:10,]
+write.table(steer_ADGHADFIH_ADGLADFIL_lefse$V1, file="differential_otus/steer_ADGHADFIH_ADGLADFIL_lefse_total.txt", col.names=F, row.names=F, quote=F)
+write.table(steer_ADGHADFIH_ADGLADFIL_lefse_subset$V1, file="differential_otus/steer_ADGHADFIH_ADGLADFIL_lefse_subset.txt", col.names=F, row.names=F, quote=F)
 
 steer_ADGHADFIH_ADGHADFIL_lefse <- read.table("lefse_outputs/steer_rel_ADGHADFIH_ADGHADFIL_lefse_result.txt", sep="\t", header=F)
 steer_ADGHADFIH_ADGHADFIL_lefse <- steer_ADGHADFIH_ADGHADFIL_lefse[complete.cases(steer_ADGHADFIH_ADGHADFIL_lefse), ]
 steer_ADGHADFIH_ADGHADFIL_lefse$V1 <- gsub("OTU", "", steer_ADGHADFIH_ADGHADFIL_lefse$V1)
 steer_ADGHADFIH_ADGHADFIL_lefse <- steer_ADGHADFIH_ADGHADFIL_lefse[order(-steer_ADGHADFIH_ADGHADFIL_lefse$V4),]
-steer_ADGHADFIH_ADGHADFIL_lefse <- steer_ADGHADFIH_ADGHADFIL_lefse[1:10,]
-write.table(steer_ADGHADFIH_ADGHADFIL_lefse$V1, file="differential_otus/steer_ADGHADFIH_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+steer_ADGHADFIH_ADGHADFIL_lefse_subset <- steer_ADGHADFIH_ADGHADFIL_lefse[1:10,]
+write.table(steer_ADGHADFIH_ADGHADFIL_lefse$V1, file="differential_otus/steer_ADGHADFIH_ADGHADFIL_lefse_total.txt", col.names=F, row.names=F, quote=F)
+write.table(steer_ADGHADFIH_ADGHADFIL_lefse_subset$V1, file="differential_otus/steer_ADGHADFIH_ADGHADFIL_lefse_subset.txt", col.names=F, row.names=F, quote=F)
 
 steer_ADGLADFIL_ADGHADFIL_lefse <- read.table("lefse_outputs/steer_rel_ADGLADFIL_ADGHADFIL_lefse_result.txt", sep="\t", header=F)
 steer_ADGLADFIL_ADGHADFIL_lefse <- steer_ADGLADFIL_ADGHADFIL_lefse[complete.cases(steer_ADGLADFIL_ADGHADFIL_lefse), ]
 steer_ADGLADFIL_ADGHADFIL_lefse$V1 <- gsub("OTU", "", steer_ADGLADFIL_ADGHADFIL_lefse$V1)
 steer_ADGLADFIL_ADGHADFIL_lefse <- steer_ADGLADFIL_ADGHADFIL_lefse[order(-steer_ADGLADFIL_ADGHADFIL_lefse$V4),]
-steer_ADGLADFIL_ADGHADFIL_lefse <- steer_ADGLADFIL_ADGHADFIL_lefse[1:10,]
-write.table(steer_ADGLADFIL_ADGHADFIL_lefse$V1, file="differential_otus/steer_ADGLADFIL_ADGHADFIL_lefse.txt", col.names=F, row.names=F, quote=F)
+steer_ADGLADFIL_ADGHADFIL_lefse_subset <- steer_ADGLADFIL_ADGHADFIL_lefse[1:10,]
+write.table(steer_ADGLADFIL_ADGHADFIL_lefse$V1, file="differential_otus/steer_ADGLADFIL_ADGHADFIL_lefse_total.txt", col.names=F, row.names=F, quote=F)
+write.table(steer_ADGLADFIL_ADGHADFIL_lefse_subset$V1, file="differential_otus/steer_ADGLADFIL_ADGHADFIL_lefse_subset.txt", col.names=F, row.names=F, quote=F)
 ```
 
-```{r, engine='bash'}
-#Concatenate lists of differential OTUs within heifer cohort
-cat differential_otus/heifer_ADGHADFIH_ADGHADFIL_lefse.txt differential_otus/heifer_ADGHADFIH_ADGLADFIL_lefse.txt differential_otus/heifer_ADGLADFIH_ADGHADFIH_lefse.txt differential_otus/heifer_ADGLADFIH_ADGHADFIL_lefse.txt differential_otus/heifer_ADGLADFIH_ADGLADFIL_lefse.txt differential_otus/heifer_ADGLADFIL_ADGHADFIL_lefse.txt | sort | uniq > differential_otus/heifer_differential_otus.txt
+## Concatenate total and subset lists of differentially abundant OTUs within heifer and steer cohorts
 
-#Concatenate lists of differential OTUs within steer cohort
-cat differential_otus/steer_ADGHADFIH_ADGHADFIL_lefse.txt differential_otus/steer_ADGHADFIH_ADGLADFIL_lefse.txt differential_otus/steer_ADGLADFIH_ADGHADFIH_lefse.txt differential_otus/steer_ADGLADFIH_ADGHADFIL_lefse.txt differential_otus/steer_ADGLADFIH_ADGLADFIL_lefse.txt differential_otus/steer_ADGLADFIL_ADGHADFIL_lefse.txt | sort | uniq > differential_otus/steer_differential_otus.txt
+```{r, engine='bash'}
+#Concatenate complete lists of differential OTUs within heifer cohort
+cat differential_otus/heifer_ADGHADFIH_ADGHADFIL_lefse_total.txt differential_otus/heifer_ADGHADFIH_ADGLADFIL_lefse_total.txt differential_otus/heifer_ADGLADFIH_ADGHADFIH_lefse_total.txt differential_otus/heifer_ADGLADFIH_ADGHADFIL_lefse_total.txt differential_otus/heifer_ADGLADFIH_ADGLADFIL_lefse_total.txt differential_otus/heifer_ADGLADFIL_ADGHADFIL_lefse_total.txt | sort | uniq > differential_otus/heifer_differential_otus_total.txt
+
+#Concatenate complete lists of differential OTUs within steer cohort
+cat differential_otus/steer_ADGHADFIH_ADGHADFIL_lefse_total.txt differential_otus/steer_ADGHADFIH_ADGLADFIL_lefse_total.txt differential_otus/steer_ADGLADFIH_ADGHADFIH_lefse_total.txt differential_otus/steer_ADGLADFIH_ADGHADFIL_lefse_total.txt differential_otus/steer_ADGLADFIH_ADGLADFIL_lefse_total.txt differential_otus/steer_ADGLADFIL_ADGHADFIL_lefse_total.txt | sort | uniq > differential_otus/steer_differential_otus_total.txt
+
+#Concatenate subset lists of differential OTUs within heifer cohort
+cat differential_otus/heifer_ADGHADFIH_ADGHADFIL_lefse_subset.txt differential_otus/heifer_ADGHADFIH_ADGLADFIL_lefse_subset.txt differential_otus/heifer_ADGLADFIH_ADGHADFIH_lefse_subset.txt differential_otus/heifer_ADGLADFIH_ADGHADFIL_lefse_subset.txt differential_otus/heifer_ADGLADFIH_ADGLADFIL_lefse_subset.txt differential_otus/heifer_ADGLADFIL_ADGHADFIL_lefse_subset.txt | sort | uniq > differential_otus/heifer_differential_otus_subset.txt
+
+#Concatenate subset lists of differential OTUs within steer cohort
+cat differential_otus/steer_ADGHADFIH_ADGHADFIL_lefse_subset.txt differential_otus/steer_ADGHADFIH_ADGLADFIL_lefse_subset.txt differential_otus/steer_ADGLADFIH_ADGHADFIH_lefse_subset.txt differential_otus/steer_ADGLADFIH_ADGHADFIL_lefse_subset.txt differential_otus/steer_ADGLADFIH_ADGLADFIL_lefse_subset.txt differential_otus/steer_ADGLADFIL_ADGHADFIL_lefse_subset.txt | sort | uniq > differential_otus/steer_differential_otus_subset.txt
+```
+
+## Generate bipartite network of differentially abundant OTUs from both cohorts and heatmaps of differentially abundant OTUs within heifer and steer cohorts
+
+```{r, engine='bash'}
+#Heifer cohort total differentially abundant OTUs
+filter_otus_from_otu_table.py -i biom_files/heifer_abundance_core_tax.biom -o biom_files/heifer_differential_otus_total.biom -e differential_otus/heifer_differential_otus_total.txt --negate_ids_to_exclude 
+
+#Steer cohort total differentially abundant OTUs
+filter_otus_from_otu_table.py -i biom_files/steer_abundance_core_tax.biom -o biom_files/steer_differential_otus_total.biom -e differential_otus/steer_differential_otus_total.txt --negate_ids_to_exclude
+
+#Cohorts total differentially abundant OTUs
+merge_otu_tables.py -i biom_files/heifer_differential_otus_total.biom,biom_files/steer_differential_otus_total.biom -o biom_files/cohorts_differential_otus_total.biom
+
+#Generated bipartite network can be visualized in Cystoscape (FigureS7)
+make_bipartite_network.py -i biom_files/cohorts_differential_otus_total.biom -m mapping_files/mapping_file_discovery.txt -k taxonomy --md_fields 'k,p,c,o,f,g,s' -o bipartite_network_differential_cohorts/ --scolors 'Group' --ocolors 'f' --osize 'Abundance'
+
+#Heifer cohort subset differentially abundant OTUs
+filter_otus_from_otu_table.py -i biom_files/heifer_abundance_core_tax.biom -o biom_files/heifer_differential_otus_subset.biom -e differential_otus/heifer_differential_otus_subset.txt --negate_ids_to_exclude 
+
+#Steer cohort subset differentially abundant OTUs
+filter_otus_from_otu_table.py -i biom_files/steer_abundance_core_tax.biom -o biom_files/steer_differential_otus_subset.biom -e differential_otus/steer_differential_otus_subset.txt --negate_ids_to_exclude 
+
+#Convert from biom to txt format 
+biom convert -i biom_files/heifer_differential_otus_total.biom -o biom_files/heifer_differential_otus_total.txt --to-tsv --header-key taxonomy
+
+biom convert -i biom_files/steer_differential_otus_total.biom -o biom_files/steer_differential_otus_total.txt --to-tsv --header-key taxonomy
+
+biom convert -i biom_files/heifer_differential_otus_subset.biom -o biom_files/heifer_differential_otus_subset.txt --to-tsv --header-key taxonomy
+
+biom convert -i biom_files/steer_differential_otus_subset.biom -o biom_files/steer_differential_otus_subset.txt --to-tsv --header-key taxonomy
+
+sed 's/#OTU ID/OTUID/g' biom_files/heifer_differential_otus_total.txt > r_inputs/heifer_differential_otus_total.txt
+
+sed 's/#OTU ID/OTUID/g' biom_files/steer_differential_otus_total.txt > r_inputs/steer_differential_otus_total.txt
+
+sed 's/#OTU ID/OTUID/g' biom_files/heifer_differential_otus_subset.txt > r_inputs/heifer_differential_otus_subset.txt
+
+sed 's/#OTU ID/OTUID/g' biom_files/steer_differential_otus_subset.txt > r_inputs/steer_differential_otus_subset.txt
+```
+
+```{r}
+#Load packages
+library(stringr)
+library(gplots) 
+library(Heatplus)
+library(vegan)
+library(RColorBrewer) 
+
+#Create data set of total differentially abundant OTUs for heifer cohort
+differential_total_heifer <- read.table("r_inputs/heifer_differential_otus_total.txt", sep="\t", header=T, stringsAsFactors=F)
+differential_total_taxa_heifer <- as.data.frame(str_split_fixed(differential_total_heifer$taxonomy, ";", 7))
+names(differential_total_taxa_heifer)[5] <- "taxonomy"
+differential_total_taxa_heifer$taxonomy <- sub(" ", "", differential_total_taxa_heifer$taxonomy)
+differential_total_taxa_heifer$taxonomy <- sub("f__", "", differential_total_taxa_heifer$taxonomy)
+differential_total_taxa_heifer$taxonomy <- sub("\\]", "", differential_total_taxa_heifer$taxonomy)
+differential_total_taxa_heifer$taxonomy <- sub("\\[", "", differential_total_taxa_heifer$taxonomy)
+differential_total_taxa_heifer$taxonomy <- sub("c\\\\\\_\\\\\\_.*", "", differential_total_taxa_heifer$taxonomy)
+differential_total_taxa_heifer$taxonomy <- sub("k\\\\\\_\\\\\\_.*", "", differential_total_taxa_heifer$taxonomy)
+differential_total_taxa_heifer$taxonomy <- sub("o\\\\\\_\\\\\\_.*", "", differential_total_taxa_heifer$taxonomy)
+differential_total_taxa_heifer$taxonomy <- sub("p\\\\\\_\\\\\\_.*", "", differential_total_taxa_heifer$taxonomy)
+differential_total_taxa_heifer$taxonomy <- sub("^$", "No Assigned Family", differential_total_taxa_heifer$taxonomy)
+differential_total_heifer <-differential_total_heifer[,-18]
+dt_heifer <- merge(differential_total_heifer, differential_total_taxa_heifer, by="row.names")
+dt_heifer <- dt_heifer[,-c(1, 19, 20, 21, 22, 24, 25)]
+
+#Generate heatmap
+row.names(dt_heifer) <- dt_heifer$OTUID
+dt_heifer <- dt_heifer[, -1]
+taxa_dt_heifer <- subset(dt_heifer, select=c(taxonomy))
+dt_samples_heifer <- dt_heifer[,-17]
+colnames(dt_samples_heifer) <- c("ADGL-ADFIH", "ADGH-ADFIH", "ADGH-ADFIH", "ADGL-ADFIL", "ADGH-ADFIH", "ADGL-ADFIH", "ADGH-ADFIL", "ADGL-ADFIH", "ADGL-ADFIL", "ADGH-ADFIL", "ADGL-ADFIL", "ADGL-ADFIL", "ADGH-ADFIH", "ADGH-ADFIL", "ADGL-ADFIH", "ADGH-ADFIL")
+dt_samples_heifer_trans <- as.data.frame(t(dt_samples_heifer))
+scalewhiteblack <- colorRampPalette(c("white", "blue"), space = "rgb")(100)
+data.dist <- vegdist(dt_samples_heifer_trans, method = "bray")
+row.clus <- hclust(data.dist, "aver")
+data.dist.g <- vegdist(t(dt_samples_heifer_trans), method = "bray")
+col.clus <- hclust(data.dist.g, "aver")
+
+pdf("figures/Figure4a.pdf", height=8, width=9)
+heatmap.2(as.matrix(dt_samples_heifer_trans), Rowv=as.dendrogram(row.clus), Colv=as.dendrogram(col.clus), labCol="", xlab="OTUs", ylab="Feed Efficiency Phenotype", col=scalewhiteblack, trace="none", density.info="none", margins=c(2,9), lhei = c(2, 8))
+dev.off()
+
+#Create data set of subset differentially abundant OTUs for heifer cohort
+differential_subset_heifer <- read.table("r_inputs/heifer_differential_otus_subset.txt", sep="\t", header=T, stringsAsFactors=F)
+differential_subset_taxa_heifer <- as.data.frame(str_split_fixed(differential_subset_heifer$taxonomy, ";", 7))
+names(differential_subset_taxa_heifer)[5] <- "taxonomy"
+differential_subset_taxa_heifer$taxonomy <- sub(" ", "", differential_subset_taxa_heifer$taxonomy)
+differential_subset_taxa_heifer$taxonomy <- sub("f__", "", differential_subset_taxa_heifer$taxonomy)
+differential_subset_taxa_heifer$taxonomy <- sub("\\]", "", differential_subset_taxa_heifer$taxonomy)
+differential_subset_taxa_heifer$taxonomy <- sub("\\[", "", differential_subset_taxa_heifer$taxonomy)
+differential_subset_taxa_heifer$taxonomy <- sub("c\\\\\\_\\\\\\_.*", "", differential_subset_taxa_heifer$taxonomy)
+differential_subset_taxa_heifer$taxonomy <- sub("k\\\\\\_\\\\\\_.*", "", differential_subset_taxa_heifer$taxonomy)
+differential_subset_taxa_heifer$taxonomy <- sub("o\\\\\\_\\\\\\_.*", "", differential_subset_taxa_heifer$taxonomy)
+differential_subset_taxa_heifer$taxonomy <- sub("p\\\\\\_\\\\\\_.*", "", differential_subset_taxa_heifer$taxonomy)
+differential_subset_taxa_heifer$taxonomy <- sub("^$", "No Assigned Family", differential_subset_taxa_heifer$taxonomy)
+differential_subset_heifer <-differential_subset_heifer[,-18]
+dsub_heifer <- merge(differential_subset_heifer, differential_subset_taxa_heifer, by="row.names")
+dsub_heifer <- dsub_heifer[,-c(1, 19, 20, 21, 22, 24, 25)]
+
+#Generate heatmap
+row.names(dsub_heifer) <- dsub_heifer$OTUID
+dsub_heifer <- dsub_heifer[, -1]
+taxa_dsub_heifer <- subset(dsub_heifer, select=c(taxonomy))
+dsub_samples_heifer <- dsub_heifer[,-17] 
+colnames(dsub_samples_heifer) <- c("ADGL-ADFIH", "ADGH-ADFIH", "ADGH-ADFIH", "ADGL-ADFIL", "ADGH-ADFIH", "ADGL-ADFIH", "ADGH-ADFIL", "ADGL-ADFIH", "ADGL-ADFIL", "ADGH-ADFIL", "ADGL-ADFIL", "ADGL-ADFIL", "ADGH-ADFIH", "ADGH-ADFIL", "ADGL-ADFIH", "ADGH-ADFIL")
+dsub_samples_heifer_trans <- as.data.frame(t(dsub_samples_heifer))
+scalewhiteblack <- colorRampPalette(c("white", "blue"), space = "rgb")(100)
+data.dist <- vegdist(dsub_samples_heifer_trans, method = "bray")
+row.clus <- hclust(data.dist, "aver")
+data.dist.g <- vegdist(t(dsub_samples_heifer_trans), method = "bray")
+col.clus <- hclust(data.dist.g, "aver")
+
+pdf("figures/Figure4b.pdf", height=8, width=9)
+heatmap.2(as.matrix(dsub_samples_heifer_trans), Rowv=as.dendrogram(row.clus), Colv=as.dendrogram(col.clus), labCol = taxa_dsub_heifer$taxonomy, xlab="Family", ylab="Feed Efficiency Phenotype", col=scalewhiteblack, trace="none", density.info="none", margins=c(9,9), lhei = c(2, 8))
+dev.off()
+
+#Create data set of total differentially abundant OTUs for steer cohort
+differential_total_steer <- read.table("r_inputs/steer_differential_otus_total.txt", sep="\t", header=T, stringsAsFactors=F)
+differential_total_taxa_steer <- as.data.frame(str_split_fixed(differential_total_steer$taxonomy, ";", 7))
+names(differential_total_taxa_steer)[5] <- "taxonomy"
+differential_total_taxa_steer$taxonomy <- sub(" ", "", differential_total_taxa_steer$taxonomy)
+differential_total_taxa_steer$taxonomy <- sub("f__", "", differential_total_taxa_steer$taxonomy)
+differential_total_taxa_steer$taxonomy <- sub("\\]", "", differential_total_taxa_steer$taxonomy)
+differential_total_taxa_steer$taxonomy <- sub("\\[", "", differential_total_taxa_steer$taxonomy)
+differential_total_taxa_steer$taxonomy <- sub("c\\\\\\_\\\\\\_.*", "", differential_total_taxa_steer$taxonomy)
+differential_total_taxa_steer$taxonomy <- sub("k\\\\\\_\\\\\\_.*", "", differential_total_taxa_steer$taxonomy)
+differential_total_taxa_steer$taxonomy <- sub("o\\\\\\_\\\\\\_.*", "", differential_total_taxa_steer$taxonomy)
+differential_total_taxa_steer$taxonomy <- sub("p\\\\\\_\\\\\\_.*", "", differential_total_taxa_steer$taxonomy)
+differential_total_taxa_steer$taxonomy <- sub("^$", "No Assigned Family", differential_total_taxa_steer$taxonomy)
+differential_total_steer <-differential_total_steer[,-18]
+dt_steer <- merge(differential_total_steer, differential_total_taxa_steer, by="row.names")
+dt_steer <- dt_steer[,-c(1, 19, 20, 21, 22, 24, 25)]
+
+#Generate heatmap
+row.names(dt_steer) <- dt_steer$OTUID
+dt_steer <- dt_steer[, -1]
+taxa_dt_steer <- subset(dt_steer, select=c(taxonomy))
+dt_samples_steer <- dt_steer[,-17]
+colnames(dt_samples_steer) <- c("ADGL-ADFIH", "ADGL-ADFIL", "ADGL-ADFIL", "ADGL-ADFIL", "ADGL-ADFIH", "ADGH-ADFIH", "ADGL-ADFIH", "ADGL-ADFIL", "ADGH-ADFIL", "ADGH-ADFIH", "ADGH-ADFIL", "ADGH-ADFIL", "ADGL-ADFIH", "ADGH-ADFIL", "ADGH-ADFIH", "ADGH-ADFIH")
+dt_samples_steer_trans <- as.data.frame(t(dt_samples_steer))
+scalewhiteblack <- colorRampPalette(c("white", "blue"), space = "rgb")(100)
+data.dist <- vegdist(dt_samples_steer_trans, method = "bray")
+row.clus <- hclust(data.dist, "aver")
+data.dist.g <- vegdist(t(dt_samples_steer_trans), method = "bray")
+col.clus <- hclust(data.dist.g, "aver")
+
+pdf("figures/Figure5a.pdf", height=8, width=9)
+heatmap.2(as.matrix(dt_samples_steer_trans), Rowv=as.dendrogram(row.clus), Colv=as.dendrogram(col.clus), labCol="", xlab="OTUs", ylab="Feed Efficiency Phenotype", col=scalewhiteblack, trace="none", density.info="none", margins=c(2,9), lhei = c(2, 8))
+dev.off()
+
+#Create data set of subset differentially abundant OTUs for steer cohort
+differential_subset_steer <- read.table("r_inputs/steer_differential_otus_subset.txt", sep="\t", header=T, stringsAsFactors=F)
+differential_subset_taxa_steer <- as.data.frame(str_split_fixed(differential_subset_steer$taxonomy, ";", 7))
+names(differential_subset_taxa_steer)[5] <- "taxonomy"
+differential_subset_taxa_steer$taxonomy <- sub(" ", "", differential_subset_taxa_steer$taxonomy)
+differential_subset_taxa_steer$taxonomy <- sub("f__", "", differential_subset_taxa_steer$taxonomy)
+differential_subset_taxa_steer$taxonomy <- sub("\\]", "", differential_subset_taxa_steer$taxonomy)
+differential_subset_taxa_steer$taxonomy <- sub("\\[", "", differential_subset_taxa_steer$taxonomy)
+differential_subset_taxa_steer$taxonomy <- sub("c\\\\\\_\\\\\\_.*", "", differential_subset_taxa_steer$taxonomy)
+differential_subset_taxa_steer$taxonomy <- sub("k\\\\\\_\\\\\\_.*", "", differential_subset_taxa_steer$taxonomy)
+differential_subset_taxa_steer$taxonomy <- sub("o\\\\\\_\\\\\\_.*", "", differential_subset_taxa_steer$taxonomy)
+differential_subset_taxa_steer$taxonomy <- sub("p\\\\\\_\\\\\\_.*", "", differential_subset_taxa_steer$taxonomy)
+differential_subset_taxa_steer$taxonomy <- sub("^$", "No Assigned Family", differential_subset_taxa_steer$taxonomy)
+differential_subset_steer <-differential_subset_steer[,-18]
+dsub_steer <- merge(differential_subset_steer, differential_subset_taxa_steer, by="row.names")
+dsub_steer <- dsub_steer[,-c(1, 19, 20, 21, 22, 24, 25)]
+
+#Generate heatmap
+row.names(dsub_steer) <- dsub_steer$OTUID
+dsub_steer <- dsub_steer[, -1]
+taxa_dsub_steer <- subset(dsub_steer, select=c(taxonomy))
+dsub_samples_steer <- dsub_steer[,-17] 
+colnames(dsub_samples_steer) <- c("ADGL-ADFIH", "ADGL-ADFIL", "ADGL-ADFIL", "ADGL-ADFIL", "ADGL-ADFIH", "ADGH-ADFIH", "ADGL-ADFIH", "ADGL-ADFIL", "ADGH-ADFIL", "ADGH-ADFIH", "ADGH-ADFIL", "ADGH-ADFIL", "ADGL-ADFIH", "ADGH-ADFIL", "ADGH-ADFIH", "ADGH-ADFIH")
+dsub_samples_steer_trans <- as.data.frame(t(dsub_samples_steer))
+scalewhiteblack <- colorRampPalette(c("white", "blue"), space = "rgb")(100)
+data.dist <- vegdist(dsub_samples_steer_trans, method = "bray")
+row.clus <- hclust(data.dist, "aver")
+data.dist.g <- vegdist(t(dsub_samples_steer_trans), method = "bray")
+col.clus <- hclust(data.dist.g, "aver")
+
+pdf("figures/Figure5b.pdf", height=8, width=9)
+heatmap.2(as.matrix(dsub_samples_steer_trans), Rowv=as.dendrogram(row.clus), Colv=as.dendrogram(col.clus), labCol = taxa_dsub_steer$taxonomy, xlab="Family", ylab="Feed Efficiency Phenotype", col=scalewhiteblack, trace="none", density.info="none", margins=c(9,9), lhei = c(2, 8))
+dev.off()
 ```

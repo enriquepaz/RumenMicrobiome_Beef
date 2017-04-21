@@ -27,6 +27,7 @@ anaconda/bin/conda create -y -n r --file r_packages.txt -c bioconda -c r -c biob
 #conda install -c bioconda r-vegan=2.3_4
 #conda install -c bioconda r-matrixstats=0.51.0
 #conda install -c bioconda r-biom=0.3.12
+#conda install -c bioconda bioconductor-heatplus=2.20.0
 
 #sra 
 wget ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-centos_linux64.tar.gz

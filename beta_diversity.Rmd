@@ -6,7 +6,7 @@ Output:
     keep_md: yes
 ---
 
-The following summarizes taxa, determines a core measurable microbiome, calculates beta diversity, and generates Principal coordinate analysis (PCoA) plots within heifer and steer cohorts.
+The following summarizes taxa, determines a core measurable microbiome, calculates beta diversity, and generates principal coordinate analysis (PCoA) plots within heifer and steer cohorts.
 
 ## Summarize taxa across samples within heifer and steer cohorts
 
@@ -40,7 +40,7 @@ taxa_data_heifer$Phyla <- sub("k__Bacteria;k\\\\_\\\\_Bacteria_unclassified", "N
 plot_taxa_long_heifer <- gather(taxa_data_heifer, Samples, Proportion, S712:S357)
 
 #Phyla stacked bar graph for heifer cohort
-graph_heifer <- ggplot(plot_taxa_long_heifer, aes(x=Samples, y=Proportion, fill=Phyla)) + geom_bar(stat="identity") + theme(axis.line=element_line(color="black", size=1), axis.text=element_text(color="black", size=11, face="bold"), axis.title=element_text(color="black", size=14, face="bold"), legend.title=element_text(color="black", size=14, face="bold", hjust=0.5), legend.text=element_text(color="black", size=12, face="bold")) + scale_fill_manual(values=c("#FF0000","#ADD8E6","#FFA500","#000080","#A52A2A","#008080","#808080","#DA70D6","#008000","#800080","#E9967A","#FFD700","#00FF00","#5F9EA0","#FF6347","#DC143C","#DCDCDC","#DEB887","#00FA9A","#BC8F8F","#E6E6FA","#556B2F","#C71585","#808000","#FFC0CB","#0000FF","#FFFF00","#00FFFF"))
+graph_heifer <- ggplot(plot_taxa_long_heifer, aes(x=Samples, y=Proportion, fill=Phyla)) + geom_bar(stat="identity") + theme(axis.line=element_line(color="black", size=1), axis.text=element_text(color="black", size=11, face="bold"), axis.title=element_text(color="black", size=14, face="bold"), legend.title=element_text(color="black", size=14, face="bold", hjust=0.5), legend.text=element_text(color="black", size=12, face="bold")) 
 
 png("figures/FigureS5.png", units="in", height=12, width=18, res=300)
 graph_heifer
@@ -61,7 +61,7 @@ taxa_data_steer$Phyla <- sub("k__Bacteria;k\\\\_\\\\_Bacteria_unclassified", "No
 plot_taxa_long_steer <- gather(taxa_data_steer, Samples, Proportion, S525:S497)
 
 #Phyla stacked bar graph for steer cohort
-graph_steer <- ggplot(plot_taxa_long_steer, aes(x=Samples, y=Proportion, fill=Phyla)) + geom_bar(stat="identity") + theme(axis.line=element_line(color="black", size=1), axis.text=element_text(color="black", size=11, face="bold"), axis.title=element_text(color="black", size=14, face="bold"), legend.title=element_text(color="black", size=14, face="bold", hjust=0.5), legend.text=element_text(color="black", size=12, face="bold")) + scale_fill_manual(values = c("#FF0000","#ADD8E6","#FFA500","#000080","#A52A2A","#808080","#DA70D6","#008000","#800080","#E9967A","#FFD700","#00FF00","#DC143C","#5F9EA0","#EEE8AA","#00FA9A","#483D8B","#E6E6FA","#556B2F","#C71585","#808000","#FFC0CB","#FAF0E6","#0000FF","#FFFF00","#00FFFF"))
+graph_steer <- ggplot(plot_taxa_long_steer, aes(x=Samples, y=Proportion, fill=Phyla)) + geom_bar(stat="identity") + theme(axis.line=element_line(color="black", size=1), axis.text=element_text(color="black", size=11, face="bold"), axis.title=element_text(color="black", size=14, face="bold"), legend.title=element_text(color="black", size=14, face="bold", hjust=0.5), legend.text=element_text(color="black", size=12, face="bold")) 
 
 png("figures/FigureS6.png", units="in", height=12, width=18, res=300)
 graph_steer
@@ -195,7 +195,7 @@ adonis(dm_weighted_steer ~ Group, permutations=999, data=mapping_steer)
 
 ## PCoA plots
 
-```{r, engine='bash'}
+```{r}
 #Load packages
 library(ggplot2)
 
@@ -248,11 +248,12 @@ multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
 }
 
 #Generate figures
-png("figures/Figure2.png", units="in", height=6, width=12, res=300)
+png("figures/Figure3.png", units="in", height=6, width=12, res=300)
 multiplot(pcoa_plot_heifer, pcoa_plot_steer, cols=2)
 dev.off()
 
-pdf("figures/Figure2.pdf", height=6, width=12)
+pdf("figures/Figure3.pdf", height=6, width=12)
 multiplot(pcoa_plot_heifer, pcoa_plot_steer, cols=2)
 dev.off()
 ```
+![Core Measurable Microbiome PCoA plots](figures/Figure3.png)

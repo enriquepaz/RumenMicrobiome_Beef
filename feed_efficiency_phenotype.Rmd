@@ -1,10 +1,12 @@
 ---
-Title: "Phylogenetic Tree, PCoA, PERMANOVA, Feed Efficiency Phenotype, Discovery Set"
+Title: "Phylogenetic Tree, PCoA, PERMANOVA, Bipartite Network, Feed Efficiency Phenotype, Discovery Set"
 Author: Henry Paz (henry.paz@huskers.unl.edu)
 Output:
   html_document:
     keep_md: yes
 ---
+
+The following generates a phylogenetic tree, calculates beta diversity and generates a bipartite network for the full dataset, and defines feed efficiency phenotypes within heifer and steer cohorts.
 
 ## Generate a phylogenetic tree 
 
@@ -65,7 +67,7 @@ pcoa_plot_full <- ggplot(pcoa_data, aes(x=PC1, y=PC2, color=Sex)) + geom_point(s
 dir.create("figures")
 
 #Generate figures
-png("figures/FigureS1.png", units="in", height=3, width=6, res=300)
+png("figures/FigureS1.png", units="in", height=4, width=6, res=300)
 pcoa_plot_full
 dev.off()
 
