@@ -21,7 +21,7 @@ rm -rf ftp-trace.ncbi.nih.gov/
 #Convert SRA data into fastq format
 for sra in *.sra
 do
-  sratoolkit.2.8.2-centos_linux64/bin/fastq-dump --split-3 "$sra" &
+  sratoolkit.2.8.2-1-centos_linux64/bin/fastq-dump --split-3 "$sra" &
 done
 wait
 
