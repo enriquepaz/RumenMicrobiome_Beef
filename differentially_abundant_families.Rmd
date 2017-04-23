@@ -1,0 +1,225 @@
+---
+Title: "Differentially Abundant OTUs"
+Author: Henry Paz (henry.paz@huskers.unl.edu)
+Output:
+  html_document:
+    keep_md: yes
+---
+
+The following identifies significant differentially abundant families across feed efficiency phenotypes within heifer and steer cohorts using the linear discriminant analysis (LDA) effect size [LEfSe](https://www.ncbi.nlm.nih.gov/pubmed/21702898) method.
+
+## Summarize family taxa across samples within core measurable microbiome of heifer and steer cohorts
+
+```{r, engine='bash'}
+#Summarize at family taxa for heifer cohort
+summarize_taxa.py -i biom_files/final_core_discovery_heifer.biom -o summarized_core_heifer -L 5
+
+#Summarize at family taxa for steer cohort
+summarize_taxa.py -i biom_files/final_core_discovery_steer.biom -o summarized_core_steer -L 5
+
+sed 's/#OTU ID/taxonomy/g' summarized_core_heifer/final_core_discovery_heifer_L5.txt > r_inputs/final_core_discovery_heifer_L5.txt
+
+sed 's/#OTU ID/taxonomy/g' summarized_core_steer/final_core_discovery_steer_L5.txt > r_inputs/final_core_discovery_steer_L5.txt
+```
+
+```{r}
+library(stringr)
+
+data_heifer <- read.table("r_inputs/final_core_discovery_heifer_L5.txt", sep="\t", header=T)
+samples_heifer <- data_heifer[,-1]
+taxa_heifer <- as.data.frame(str_split_fixed(data_heifer$taxonomy, ";", 5))
+names(taxa_heifer)[5] <- "taxonomy"
+taxa_heifer$taxonomy <- sub(" ", "", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- sub("f__", "", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- sub("\\]", "", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- sub("\\[", "", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- sub("c\\\\\\_\\\\\\_.*", "", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- sub("k\\\\\\_\\\\\\_.*", "", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- sub("o\\\\\\_\\\\\\_.*", "", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- sub("p\\\\\\_\\\\\\_.*", "", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- sub("^$", "No Assigned Family", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- make.unique(taxa_heifer$taxonomy)
+family_heifer <- merge(samples_heifer, taxa_heifer, by="row.names")
+family_heifer <- family_heifer[,-c(1, 18, 19, 20, 21)]
+
+write.table(family_heifer, sep="\t", file="r_inputs/family_based_heifer.txt", row.names=F, col.names=T, quote=F)
+
+data_steer <- read.table("r_inputs/final_core_discovery_steer_L5.txt", sep="\t", header=T)
+samples_steer <- data_steer[,-1]
+taxa_steer <- as.data.frame(str_split_fixed(data_steer$taxonomy, ";", 5))
+names(taxa_steer)[5] <- "taxonomy"
+taxa_steer$taxonomy <- sub(" ", "", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- sub("f__", "", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- sub("\\]", "", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- sub("\\[", "", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- sub("c\\\\\\_\\\\\\_.*", "", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- sub("k\\\\\\_\\\\\\_.*", "", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- sub("o\\\\\\_\\\\\\_.*", "", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- sub("p\\\\\\_\\\\\\_.*", "", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- sub("^$", "No Assigned Family", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- make.unique(taxa_steer$taxonomy)
+family_steer <- merge(samples_steer, taxa_steer, by="row.names")
+family_steer <- family_steer[,-c(1, 18, 19, 20, 21)]
+
+write.table(family_steer, sep="\t", file="r_inputs/family_based_steer.txt", row.names=F, col.names=T, quote=F)
+```
+
+## Create data sets for LEfSe pairwise comparisons across feed efficiency phenotypes within heifer and steer cohorts
+
+```{r}
+#heifer data
+heifer_family <- read.table("r_inputs/family_based_heifer.txt", sep="\t", header=T, fill=T, stringsAsFactors=F)
+heifer_family <- heifer_family[,c(17,1:16)]
+row.names(heifer_family) <- heifer_family$taxonomy
+heifer_family <- heifer_family[,-1]
+heifer_fam <- heifer_family[0, ]
+heifer_fam[nrow(heifer_fam) + 1, ] <- c("BWGL-DMIH", "BWGH-DMIH", "BWGH-DMIH", "BWGL-DMIL", "BWGH-DMIH", "BWGL-DMIH", "BWGH-DMIL", "BWGL-DMIH", "BWGL-DMIL", "BWGH-DMIL", "BWGL-DMIL", "BWGL-DMIL", "BWGH-DMIH", "BWGH-DMIL", "BWGL-DMIH", "BWGH-DMIL")
+heifer_fam[nrow(heifer_fam) + 1, ] <- c("S712", "S380", "S382", "S567", "S303", "S713", "S308", "S680", "S673", "S313", "S715", "S347", "S346", "S295", "S694", "S357")
+row.names(heifer_fam) <- c("Group", "ID")
+heifer_family_lefse <- rbind(heifer_fam, heifer_family)
+
+heifer_fam_BWGLDMIH_BWGHDMIH <- heifer_family_lefse[,c("S712", "S713", "S680", "S694", "S380", "S382", "S303", "S346")]
+heifer_fam_BWGLDMIH_BWGLDMIL <- heifer_family_lefse[,c("S712", "S713", "S680", "S694", "S567", "S673", "S715", "S347")]
+heifer_fam_BWGLDMIH_BWGHDMIL <- heifer_family_lefse[,c("S712", "S713", "S680", "S694", "S308", "S313", "S295", "S357")]
+heifer_fam_BWGHDMIH_BWGLDMIL <- heifer_family_lefse[,c("S380", "S382", "S303", "S346", "S567", "S673", "S715", "S347")]
+heifer_fam_BWGHDMIH_BWGHDMIL <- heifer_family_lefse[,c("S380", "S382", "S303", "S346", "S308", "S313", "S295", "S357")]
+heifer_fam_BWGLDMIL_BWGHDMIL <- heifer_family_lefse[,c("S567", "S673", "S715", "S347", "S308", "S313", "S295", "S357")]
+
+write.table(heifer_family_lefse, sep="\t", file="relative_abundance_groups/heifer_groups_family.txt", row.names=T, col.names=F, quote=F)
+write.table(heifer_fam_BWGLDMIH_BWGHDMIH, sep="\t", file="relative_abundance_groups/heifer_fam_BWGLDMIH_BWGHDMIH.txt", row.names=T, col.names=F, quote=F)
+write.table(heifer_fam_BWGLDMIH_BWGLDMIL, sep="\t", file="relative_abundance_groups/heifer_fam_BWGLDMIH_BWGLDMIL.txt", row.names=T, col.names=F, quote=F)
+write.table(heifer_fam_BWGLDMIH_BWGHDMIL, sep="\t", file="relative_abundance_groups/heifer_fam_BWGLDMIH_BWGHDMIL.txt", row.names=T, col.names=F, quote=F)
+write.table(heifer_fam_BWGHDMIH_BWGLDMIL, sep="\t", file="relative_abundance_groups/heifer_fam_BWGHDMIH_BWGLDMIL.txt", row.names=T, col.names=F, quote=F)
+write.table(heifer_fam_BWGHDMIH_BWGHDMIL, sep = "\t", file = "relative_abundance_groups/heifer_fam_BWGHDMIH_BWGHDMIL.txt", row.names = T, col.names = F, quote = F)
+write.table(heifer_fam_BWGLDMIL_BWGHDMIL, sep="\t", file="relative_abundance_groups/heifer_fam_BWGLDMIL_BWGHDMIL.txt", row.names=T, col.names=F, quote=F)
+
+#steer data
+steer_family <- read.table("r_inputs/family_based_steer.txt", sep="\t", header=T,  fill=T, stringsAsFactors=F)
+steer_family <- steer_family[,c(17,1:16)]
+row.names(steer_family) <- steer_family$taxonomy
+steer_family <- steer_family[,-1]
+steer_fam <- steer_family[0, ]
+steer_fam[nrow(steer_fam) + 1, ] <- c("BWGL-DMIH", "BWGL-DMIL", "BWGL-DMIL", "BWGL-DMIL", "BWGL-DMIH", "BWGH-DMIH", "BWGL-DMIH", "BWGL-DMIL", "BWGH-DMIL", "BWGH-DMIH", "BWGH-DMIL", "BWGH-DMIL", "BWGL-DMIH", "BWGH-DMIL", "BWGH-DMIH", "BWGH-DMIH")
+steer_fam[nrow(steer_fam) + 1, ] <- c("S525", "S256", "S485", "S281", "S272", "S527", "S510", "S486", "S562", "S254", "S518", "S524", "S288", "S241", "S512", "S497")
+row.names(steer_fam) <- c("Group", "ID")
+steer_family_lefse <- rbind(steer_fam, steer_family)
+
+steer_fam_BWGLDMIH_BWGHDMIH <- steer_family_lefse[,c("S525", "S272", "S510", "S288", "S527", "S254", "S512", "S497")]
+steer_fam_BWGLDMIH_BWGLDMIL <- steer_family_lefse[,c("S525", "S272", "S510", "S288", "S256", "S485", "S281", "S486")]
+steer_fam_BWGLDMIH_BWGHDMIL <- steer_family_lefse[,c("S525", "S272", "S510", "S288", "S562", "S518", "S524", "S241")]
+steer_fam_BWGHDMIH_BWGLDMIL <- steer_family_lefse[,c("S527", "S254", "S512", "S497", "S256", "S485", "S281", "S486")]
+steer_fam_BWGHDMIH_BWGHDMIL <- steer_family_lefse[,c("S527", "S254", "S512", "S497", "S562", "S518", "S524", "S241")]
+steer_fam_BWGLDMIL_BWGHDMIL <- steer_family_lefse[,c("S256", "S485", "S281", "S486", "S562", "S518", "S524", "S241")]
+
+write.table(steer_family_lefse, sep="\t", file="relative_abundance_groups/steer_family_lefse.txt", row.names=T, col.names=F, quote=F)
+write.table(steer_fam_BWGLDMIH_BWGHDMIH, sep="\t", file="relative_abundance_groups/steer_fam_BWGLDMIH_BWGHDMIH.txt", row.names=T, col.names=F, quote=F)
+write.table(steer_fam_BWGLDMIH_BWGLDMIL, sep="\t", file="relative_abundance_groups/steer_fam_BWGLDMIH_BWGLDMIL.txt", row.names=T, col.names=F, quote=F)
+write.table(steer_fam_BWGLDMIH_BWGHDMIL, sep="\t", file="relative_abundance_groups/steer_fam_BWGLDMIH_BWGHDMIL.txt", row.names=T, col.names=F, quote=F)
+write.table(steer_fam_BWGHDMIH_BWGLDMIL, sep="\t", file="relative_abundance_groups/steer_fam_BWGHDMIH_BWGLDMIL.txt", row.names=T, col.names=F, quote=F)
+write.table(steer_fam_BWGHDMIH_BWGHDMIL, sep="\t", file="relative_abundance_groups/steer_fam_BWGHDMIH_BWGHDMIL.txt", row.names=T, col.names=F, quote=F)
+write.table(steer_fam_BWGLDMIL_BWGHDMIL, sep="\t", file="relative_abundance_groups/steer_fam_BWGLDMIL_BWGHDMIL.txt", row.names=T, col.names=F, quote=F)
+```
+
+## Identify differentially abundant families across feed efficiency phenotypes within heifer and steer cohorts
+
+Results from LEfSe are provided in the Github [repository](https://github.com/enriquepaz/RumenMicrobiome_Beef) within the lefse_outputs directory and were generated as described below.
+
+```{r, engine='bash', eval=FALSE}
+python bioinfo_tools/lefse/format_input.py relative_abundance_groups/heifer_fam_BWGLDMIH_BWGHDMIH.txt lefse_outputs/heifer_fam_BWGLDMIH_BWGHDMIH_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python bioinfo_tools/lefse/run_lefse.py lefse_outputs/heifer_fam_BWGLDMIH_BWGHDMIH_lefse_format.txt lefse_outputs/heifer_fam_BWGLDMIH_BWGHDMIH_lefse_result.txt
+
+python bioinfo_tools/lefse/format_input.py relative_abundance_groups/heifer_fam_BWGLDMIH_BWGLDMIL.txt lefse_outputs/heifer_fam_BWGLDMIH_BWGLDMIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python bioinfo_tools/lefse/run_lefse.py lefse_outputs/heifer_fam_BWGLDMIH_BWGLDMIL_lefse_format.txt lefse_outputs/heifer_fam_BWGLDMIH_BWGLDMIL_lefse_result.txt
+
+python bioinfo_tools/lefse/format_input.py relative_abundance_groups/heifer_fam_BWGLDMIH_BWGHDMIL.txt lefse_outputs/heifer_fam_BWGLDMIH_BWGHDMIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python bioinfo_tools/lefse/run_lefse.py lefse_outputs/heifer_fam_BWGLDMIH_BWGHDMIL_lefse_format.txt lefse_outputs/heifer_fam_BWGLDMIH_BWGHDMIL_lefse_result.txt
+
+python bioinfo_tools/lefse/format_input.py relative_abundance_groups/heifer_fam_BWGHDMIH_BWGLDMIL.txt lefse_outputs/heifer_fam_BWGHDMIH_BWGLDMIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python bioinfo_tools/lefse/run_lefse.py lefse_outputs/heifer_fam_BWGHDMIH_BWGLDMIL_lefse_format.txt lefse_outputs/heifer_fam_BWGHDMIH_BWGLDMIL_lefse_result.txt
+
+python bioinfo_tools/lefse/format_input.py relative_abundance_groups/heifer_fam_BWGHDMIH_BWGHDMIL.txt lefse_outputs/heifer_fam_BWGHDMIH_BWGHDMIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python bioinfo_tools/lefse/run_lefse.py lefse_outputs/heifer_fam_BWGHDMIH_BWGHDMIL_lefse_format.txt lefse_outputs/heifer_fam_BWGHDMIH_BWGHDMIL_lefse_result.txt
+
+python bioinfo_tools/lefse/format_input.py relative_abundance_groups/heifer_fam_BWGLDMIL_BWGHDMIL.txt lefse_outputs/heifer_fam_BWGLDMIL_BWGHDMIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python bioinfo_tools/lefse/run_lefse.py lefse_outputs/heifer_fam_BWGLDMIL_BWGHDMIL_lefse_format.txt lefse_outputs/heifer_fam_BWGLDMIL_BWGHDMIL_lefse_result.txt
+
+python bioinfo_tools/lefse/format_input.py relative_abundance_groups/steer_fam_BWGLDMIH_BWGHDMIH.txt lefse_outputs/steer_fam_BWGLDMIH_BWGHDMIH_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python bioinfo_tools/lefse/run_lefse.py lefse_outputs/steer_fam_BWGLDMIH_BWGHDMIH_lefse_format.txt lefse_outputs/steer_fam_BWGLDMIH_BWGHDMIH_lefse_result.txt
+
+python bioinfo_tools/lefse/format_input.py relative_abundance_groups/steer_fam_BWGLDMIH_BWGLDMIL.txt lefse_outputs/steer_fam_BWGLDMIH_BWGLDMIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python bioinfo_tools/lefse/run_lefse.py lefse_outputs/steer_fam_BWGLDMIH_BWGLDMIL_lefse_format.txt lefse_outputs/steer_fam_BWGLDMIH_BWGLDMIL_lefse_result.txt
+
+python bioinfo_tools/lefse/format_input.py relative_abundance_groups/steer_fam_BWGLDMIH_BWGHDMIL.txt lefse_outputs/steer_fam_BWGLDMIH_BWGHDMIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python bioinfo_tools/lefse/run_lefse.py lefse_outputs/steer_fam_BWGLDMIH_BWGHDMIL_lefse_format.txt lefse_outputs/steer_fam_BWGLDMIH_BWGHDMIL_lefse_result.txt
+
+python bioinfo_tools/lefse/format_input.py relative_abundance_groups/steer_fam_BWGHDMIH_BWGLDMIL.txt lefse_outputs/steer_fam_BWGHDMIH_BWGLDMIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python bioinfo_tools/lefse/run_lefse.py lefse_outputs/steer_fam_BWGHDMIH_BWGLDMIL_lefse_format.txt lefse_outputs/steer_fam_BWGHDMIH_BWGLDMIL_lefse_result.txt
+
+python bioinfo_tools/lefse/format_input.py relative_abundance_groups/steer_fam_BWGHDMIH_BWGHDMIL.txt lefse_outputs/steer_fam_BWGHDMIH_BWGHDMIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python bioinfo_tools/lefse/run_lefse.py lefse_outputs/steer_fam_BWGHDMIH_BWGHDMIL_lefse_format.txt lefse_outputs/steer_fam_BWGHDMIH_BWGHDMIL_lefse_result.txt
+
+python bioinfo_tools/lefse/format_input.py relative_abundance_groups/steer_fam_BWGLDMIL_BWGHDMIL.txt lefse_outputs/steer_fam_BWGLDMIL_BWGHDMIL_lefse_format.txt -c 1 -s -1 -u 2 -o 1000000
+python bioinfo_tools/lefse/run_lefse.py lefse_outputs/steer_fam_BWGLDMIL_BWGHDMIL_lefse_format.txt lefse_outputs/steer_fam_BWGLDMIL_BWGHDMIL_lefse_result.txt
+```
+
+## Subset significant differentially abundant families from pairwise comparisons.
+
+```{r}
+heifer_fam_BWGLDMIH_BWGHDMIH_lefse <- read.table("lefse_outputs/heifer_fam_BWGLDMIH_BWGHDMIH_lefse_result.txt", header = F, sep = "\t")
+heifer_fam_BWGLDMIH_BWGHDMIH_lefse <- heifer_fam_BWGLDMIH_BWGHDMIH_lefse[complete.cases(heifer_fam_BWGLDMIH_BWGHDMIH_lefse), ]
+write.table(heifer_fam_BWGLDMIH_BWGHDMIH_lefse$V1, file = "differential_otus/heifer_fam_BWGLDMIH_BWGHDMIH_lefse.txt", row.names = F, col.names = F, quote = F)
+
+heifer_fam_BWGLDMIH_BWGLDMIL_lefse <- read.table("lefse_outputs/heifer_fam_BWGLDMIH_BWGLDMIL_lefse_result.txt", header = F, sep = "\t")
+heifer_fam_BWGLDMIH_BWGLDMIL_lefse <- heifer_fam_BWGLDMIH_BWGLDMIL_lefse[complete.cases(heifer_fam_BWGLDMIH_BWGLDMIL_lefse), ]
+write.table(heifer_fam_BWGLDMIH_BWGLDMIL_lefse$V1, file = "differential_otus/heifer_fam_BWGLDMIH_BWGLDMIL_lefse.txt", row.names = F, col.names = F, quote = F)
+
+heifer_fam_BWGLDMIH_BWGHDMIL_lefse <- read.table("lefse_outputs/heifer_fam_BWGLDMIH_BWGHDMIL_lefse_result.txt", header = F, sep = "\t")
+heifer_fam_BWGLDMIH_BWGHDMIL_lefse <- heifer_fam_BWGLDMIH_BWGHDMIL_lefse[complete.cases(heifer_fam_BWGLDMIH_BWGHDMIL_lefse), ]
+write.table(heifer_fam_BWGLDMIH_BWGHDMIL_lefse$V1, file = "differential_otus/heifer_fam_BWGLDMIH_BWGHDMIL_lefse.txt", row.names = F, col.names = F, quote = F)
+
+heifer_fam_BWGHDMIH_BWGLDMIL_lefse <- read.table("lefse_outputs/heifer_fam_BWGHDMIH_BWGLDMIL_lefse_result.txt", header = F, sep = "\t")
+heifer_fam_BWGHDMIH_BWGLDMIL_lefse <- heifer_fam_BWGHDMIH_BWGLDMIL_lefse[complete.cases(heifer_fam_BWGHDMIH_BWGLDMIL_lefse), ]
+write.table(heifer_fam_BWGHDMIH_BWGLDMIL_lefse$V1, file = "differential_otus/heifer_fam_BWGHDMIH_BWGLDMIL_lefse.txt", row.names = F, col.names = F, quote = F)
+
+heifer_fam_BWGHDMIH_BWGHDMIL_lefse <- read.table("lefse_outputs/heifer_fam_BWGHDMIH_BWGHDMIL_lefse_result.txt", header = F, sep = "\t")
+heifer_fam_BWGHDMIH_BWGHDMIL_lefse <- heifer_fam_BWGHDMIH_BWGHDMIL_lefse[complete.cases(heifer_fam_BWGHDMIH_BWGHDMIL_lefse), ]
+write.table(heifer_fam_BWGHDMIH_BWGHDMIL_lefse$V1, file = "differential_otus/heifer_fam_BWGHDMIH_BWGHDMIL_lefse.txt", row.names = F, col.names = F, quote = F)
+
+heifer_fam_BWGLDMIL_BWGHDMIL_lefse <- read.table("lefse_outputs/heifer_fam_BWGLDMIL_BWGHDMIL_lefse_result.txt", header = F, sep = "\t")
+heifer_fam_BWGLDMIL_BWGHDMIL_lefse <- heifer_fam_BWGLDMIL_BWGHDMIL_lefse[complete.cases(heifer_fam_BWGLDMIL_BWGHDMIL_lefse), ]
+write.table(heifer_fam_BWGLDMIL_BWGHDMIL_lefse$V1, file = "differential_otus/heifer_fam_BWGLDMIL_BWGHDMIL_lefse.txt", row.names = F, col.names = F, quote = F)
+
+steer_fam_BWGLDMIH_BWGHDMIH_lefse <- read.table("lefse_outputs/steer_fam_BWGLDMIH_BWGHDMIH_lefse_result.txt", header = F, sep = "\t")
+steer_fam_BWGLDMIH_BWGHDMIH_lefse <- steer_fam_BWGLDMIH_BWGHDMIH_lefse[complete.cases(steer_fam_BWGLDMIH_BWGHDMIH_lefse), ]
+write.table(steer_fam_BWGLDMIH_BWGHDMIH_lefse$V1, file = "differential_otus/steer_fam_BWGLDMIH_BWGHDMIH_lefse.txt", row.names = F, col.names = F, quote = F)
+
+steer_fam_BWGLDMIH_BWGLDMIL_lefse <- read.table("lefse_outputs/steer_fam_BWGLDMIH_BWGLDMIL_lefse_result.txt", header = F, sep = "\t")
+steer_fam_BWGLDMIH_BWGLDMIL_lefse <- steer_fam_BWGLDMIH_BWGLDMIL_lefse[complete.cases(steer_fam_BWGLDMIH_BWGLDMIL_lefse), ]
+write.table(steer_fam_BWGLDMIH_BWGLDMIL_lefse$V1, file = "differential_otus/steer_fam_BWGLDMIH_BWGLDMIL_lefse.txt", row.names = F, col.names = F, quote = F)
+
+steer_fam_BWGLDMIH_BWGHDMIL_lefse <- read.table("lefse_outputs/steer_fam_BWGLDMIH_BWGHDMIL_lefse_result.txt", header = F, sep = "\t")
+steer_fam_BWGLDMIH_BWGHDMIL_lefse <- steer_fam_BWGLDMIH_BWGHDMIL_lefse[complete.cases(steer_fam_BWGLDMIH_BWGHDMIL_lefse), ]
+write.table(steer_fam_BWGLDMIH_BWGHDMIL_lefse$V1, file = "differential_otus/steer_fam_BWGLDMIH_BWGHDMIL_lefse.txt", row.names = F, col.names = F, quote = F)
+
+steer_fam_BWGHDMIH_BWGLDMIL_lefse <- read.table("lefse_outputs/steer_fam_BWGHDMIH_BWGLDMIL_lefse_result.txt", header = F, sep = "\t")
+steer_fam_BWGHDMIH_BWGLDMIL_lefse <- steer_fam_BWGHDMIH_BWGLDMIL_lefse[complete.cases(steer_fam_BWGHDMIH_BWGLDMIL_lefse), ]
+write.table(steer_fam_BWGHDMIH_BWGLDMIL_lefse$V1, file = "differential_otus/steer_fam_BWGHDMIH_BWGLDMIL_lefse.txt", row.names = F, col.names = F, quote = F)
+
+steer_fam_BWGHDMIH_BWGHDMIL_lefse <- read.table("lefse_outputs/steer_fam_BWGHDMIH_BWGHDMIL_lefse_result.txt", header = F, sep = "\t")
+steer_fam_BWGHDMIH_BWGHDMIL_lefse <- steer_fam_BWGHDMIH_BWGHDMIL_lefse[complete.cases(steer_fam_BWGHDMIH_BWGHDMIL_lefse), ]
+write.table(steer_fam_BWGHDMIH_BWGHDMIL_lefse$V1, file = "differential_otus/steer_fam_BWGHDMIH_BWGHDMIL_lefse.txt", row.names = F, col.names = F, quote = F)
+
+steer_fam_BWGLDMIL_BWGHDMIL_lefse <- read.table("lefse_outputs/steer_fam_BWGLDMIL_BWGHDMIL_lefse_result.txt", header = F, sep = "\t")
+steer_fam_BWGLDMIL_BWGHDMIL_lefse <- steer_fam_BWGLDMIL_BWGHDMIL_lefse[complete.cases(steer_fam_BWGLDMIL_BWGHDMIL_lefse), ]
+write.table(steer_fam_BWGLDMIL_BWGHDMIL_lefse$V1, file = "differential_otus/steer_fam_BWGLDMIL_BWGHDMIL_lefse.txt", row.names = F, col.names = F, quote = F)
+```
+
+## Concatenate lists of differentially abundant families within heifer and steer cohorts
+
+```{r, engine='bash'}
+#Concatenate lists of differential families within heifer cohort
+cat differential_otus/heifer_fam_BWGHDMIH_BWGHDMIL_lefse.txt differential_otus/heifer_fam_BWGHDMIH_BWGLDMIL_lefse.txt differential_otus/heifer_fam_BWGLDMIH_BWGHDMIH_lefse.txt differential_otus/heifer_fam_BWGLDMIH_BWGHDMIL_lefse.txt differential_otus/heifer_fam_BWGLDMIH_BWGLDMIL_lefse.txt differential_otus/heifer_fam_BWGLDMIL_BWGHDMIL_lefse.txt | sort | uniq > differential_otus/heifer_fam_differential.txt
+
+#Concatenate lists of differential families within steer cohort
+cat differential_otus/steer_fam_BWGHDMIH_BWGHDMIL_lefse.txt differential_otus/steer_fam_BWGHDMIH_BWGLDMIL_lefse.txt differential_otus/steer_fam_BWGLDMIH_BWGHDMIH_lefse.txt differential_otus/steer_fam_BWGLDMIH_BWGHDMIL_lefse.txt differential_otus/steer_fam_BWGLDMIH_BWGLDMIL_lefse.txt differential_otus/steer_fam_BWGLDMIL_BWGHDMIL_lefse.txt | sort | uniq > differential_otus/steer_fam_differential.txt
+```

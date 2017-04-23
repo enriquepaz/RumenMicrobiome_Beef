@@ -1,0 +1,33 @@
+Succinivibrionaceae	5.55654321741			-
+RF16	4.28613723286			-
+S24_7	5.16608250301			-
+Paraprevotellaceae	4.55954497953			-
+Veillonellaceae	5.02570298855			-
+Corynebacteriaceae	2.27563898319			-
+Erysipelotrichaceae	3.34280725056			-
+RFP12	3.3712759725			-
+Mogibacteriaceae	3.93644320665			-
+F16	3.09258657812			-
+Lactobacillaceae	3.18566120265			-
+Spirochaetaceae	4.18902416926			-
+Clostridiaceae	3.19898649782			-
+Sphaerochaetaceae	3.4344150423	BWGH-DMIL	3.1575973394	0.0209213353378
+Elusimicrobiaceae	2.50050882273			-
+Ruminococcaceae	4.36616249176			-
+Lachnospiraceae	4.88347699071	BWGH-DMIH	3.94332528635	0.0433081428108
+p_2534_18B5	3.83507401152			-
+NoAssignedFamily12	2.65935613943			-
+NoAssignedFamily13	2.59640804384			-
+Prevotellaceae	5.46390087918			-
+NoAssignedFamily17	3.06006547821			-
+Coriobacteriaceae	2.41408298768			-
+NoAssignedFamily9	1.95354450278			-
+NoAssignedFamily6	3.76984273715			-
+Alcaligenaceae	2.23749345069			-
+NoAssignedFamily5	3.40791270652			-
+NoAssignedFamily2	3.56976904451			-
+NoAssignedFamily3	4.55840380188			-
+Bifidobacteriaceae	2.92661218615	BWGH-DMIH	3.01176072843	0.0201645730223
+NoAssignedFamily1	2.39284404664			-
+Dethiosulfovibrionaceae	3.42589572141			-
+Desulfovibrionaceae	3.8748026837			-

@@ -1,0 +1,50 @@
+Anaeroplasmataceae	3.82875011782			-
+Succinivibrionaceae	5.19992803221			-
+NoAssignedFamily2	3.41715556267			-
+WCHB1_25	3.25088574927			-
+Anaerolinaceae	2.49414316987			-
+NoAssignedFamily8	2.44814603251			-
+RF16	5.07558143371			-
+S24_7	3.76142818199			-
+NoAssignedFamily20	2.58146010664			-
+Veillonellaceae	4.78397042755	BWGH-DMIL	3.90724913021	0.0209213353378
+Pseudomonadaceae	0.0			-
+R4_45B	3.60310717975			-
+Erysipelotrichaceae	4.02432886051			-
+NoAssignedFamily13	3.73216394818			-
+RFP12	4.47371932024			-
+Mogibacteriaceae	2.82448780515			-
+Victivallaceae	3.38850894433	BWGH-DMIH	3.00644598198	0.0433081428108
+Spirochaetaceae	4.05980745047			-
+Clostridiaceae	3.88285629707			-
+Fibrobacteraceae	4.7808509415			-
+NoAssignedFamily17	4.27279766218			-
+Sphaerochaetaceae	2.73265043438			-
+Desulfovibrionaceae	2.99943973866			-
+Ruminococcaceae	4.45691431423			-
+Campylobacteraceae	1.50634680432			-
+Christensenellaceae	2.67205241954			-
+NoAssignedFamily18	2.45003237969			-
+NoAssignedFamily19	2.54390142895			-
+NoAssignedFamily10	2.857789516			-
+NoAssignedFamily11	2.85623452521			-
+NoAssignedFamily12	2.92778036942	BWGH-DMIH	3.22428106147	0.0209213353378
+Lachnospiraceae	4.35212135156			-
+Prevotellaceae	5.56968622207			-
+NoAssignedFamily15	2.57622917262			-
+NoAssignedFamily16	2.48906430948			-
+BS11	4.38270277739			-
+NoAssignedFamily14	2.45515687704			-
+Bacteroidaceae	3.48640689016			-
+Coriobacteriaceae	1.80737679999			-
+NoAssignedFamily9	3.50702387624	BWGH-DMIH	3.49693017675	0.0209213353378
+NoAssignedFamily6	4.48877638897			-
+NoAssignedFamily7	2.76037483929			-
+NoAssignedFamily4	2.73020715192			-
+NoAssignedFamily5	3.80931479131	BWGH-DMIH	3.40505974476	0.0209213353378
+F16	3.91051766133			-
+NoAssignedFamily3	4.61932356242			-
+Paraprevotellaceae	4.45514488261			-
+NoAssignedFamily1	3.47864200729			-
+Pirellulaceae	3.15539637158			-
+Alcaligenaceae	2.09537282012			-

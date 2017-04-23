@@ -10,7 +10,8 @@ Follow the instructions below to setup the same environment used to analyze the 
 	5. alpha_diversity.Rmd
 	6. beta_diversity.Rmd
 	7. differential_OTUs.Rmd
-    8. forward_stepwise_regression.Rmd
+	8. differentially_abundant_families.Rmd
+    9. forward_stepwise_regression.Rmd
 
 Due to licensing constraints, USEARCH could not be included in the setup. The current dataset requires more than the 4Gb RAM allowed in the no-charge 32-bit version, thus the paid license Linux [USEARCH 64-bit version](http://drive5.com/usearch/buy64bit.html) was used. USEARCH outputs required in the analyses are provided in the usearch_outputs directory.
 

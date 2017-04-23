@@ -130,7 +130,7 @@ write.table(steer_rel_ADGLADFIL_ADGHADFIL, file="relative_abundance_groups/steer
 
 ## Identify differentially abundant OTUs across feed efficiency phenotypes within heifer and steer cohorts
 
-Results from LEfSe are provided in the Github [repository](https://github.com/enriquepaz/RumenMicrobiome_Beef) in the lefse_outputs directory and were generated as described below.
+Results from LEfSe are provided in the Github [repository](https://github.com/enriquepaz/RumenMicrobiome_Beef) within the lefse_outputs directory and were generated as described below.
 
 ```{r, engine='bash', eval=FALSE}
 #Download LEfSe
