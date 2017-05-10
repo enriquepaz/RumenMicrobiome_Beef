@@ -12,6 +12,7 @@ Follow the instructions below to setup the same environment used to analyze the 
 	7. differential_OTUs.Rmd
 	8. differentially_abundant_families.Rmd
     9. forward_stepwise_regression.Rmd
+    10. forward_stepwise_regression_family.Rmd
 
 Due to licensing constraints, USEARCH could not be included in the setup. The current dataset requires more than the 4Gb RAM allowed in the no-charge 32-bit version, thus the paid license Linux [USEARCH 64-bit version](http://drive5.com/usearch/buy64bit.html) was used. USEARCH outputs required in the analyses are provided in the usearch_outputs directory.
 
@@ -23,19 +24,14 @@ Clone the github repository and run the setup.sh script
 - cd RumenMicrobiome_Beef
 - ./setup.sh
 
-Anaconda is downloaded and prompts you during installataion of the packages. The prompts are roughly as follows:
-
-- Press enter to view the license agreement
-- Press enter to read the license and q to exit
-- Accept the terms
-- Prompts where to install anaconda. Simply type anaconda to create a directory within the current directory. Should be: [/Users/user/anaconda] >>> anaconda
-- No to prepend anaconda to your path. Choosing yes should not impact the installation.
-- Will be asked a few times if you wish to proceed with installing the packages...agree to it.
-
 **Render R Markdown files**
+
+Within the RumenMicrobiome_Beef directory
 
 - source anaconda/bin/activate qiimemothur
 - anaconda/envs/r/bin/Rscript -e "rmarkdown::render('file[1-8].Rmd')"
+
+
 
 
 
