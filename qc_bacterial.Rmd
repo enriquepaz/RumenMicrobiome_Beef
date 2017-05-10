@@ -17,8 +17,6 @@ assign_taxonomy.py -i usearch_outputs/otus2.fa -t anaconda/envs/qiimemothur/lib/
 
 ```{r, engine='bash'}
 #Add taxonomy data to OTU table with column header "taxonomy" and convert OTU table to biom format
-mkdir biom_files
-
 awk 'NR==1; NR > 1 {print $0 | "sort"}' otu_tables/otu_table.txt > assigned_gg_taxa/otu_table.sort.txt 
 
 sort assigned_gg_taxa/otus2_tax_assignments.txt > assigned_gg_taxa/otus2_tax_assignments.sort.txt

@@ -1,0 +1,430 @@
+---
+Title: "Taxa-based Models: Arcsine Square Root Transformation, Forward Stepwise Regression"
+Author: Henry Paz (henry.paz@huskers.unl.edu)
+Output:
+  html_document:
+    keep_md: yes
+---
+
+The following arcsine square root transforms the summarized test sets at family level and performs forward stepwise regressions of taxa-based models for average daily feed intake (ADFI), average daily gain (ADG), feed efficiency (ADG/ADFI) within heifer and steer cohort.
+
+## Summarized test sets at family level for heifer and steer cohorts
+
+```{r, engine='bash'}
+sed 's/#OTU ID/taxonomy/g' biom_files/otu_table_test_heifer_L5.txt > r_inputs/otu_table_test_heifer_L5.txt
+
+sed 's/#OTU ID/taxonomy/g' biom_files/otu_table_test_steer_L5.txt > r_inputs/otu_table_test_steer_L5.txt
+```
+
+```{r}
+#Load packages
+library(stringr)
+
+#heifer data
+heifer_test_family <- read.table("r_inputs/otu_table_test_heifer_L5.txt", sep="\t", header=T)
+samples_heifer <- heifer_test_family[,-1]
+taxa_heifer <- as.data.frame(str_split_fixed(heifer_test_family$taxonomy, ";", 5))
+names(taxa_heifer)[5] <- "taxonomy"
+taxa_heifer$taxonomy <- sub("f__", "", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- sub("\\]", "", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- sub("\\[", "", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- sub("^$", "No Assigned Family", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy <- sub("Other", "No Assigned Family", taxa_heifer$taxonomy)
+taxa_heifer$taxonomy[1] <- "NoAssignedFamily1"
+taxa_heifer$taxonomy[60] <- "NoAssignedFamily2"
+taxa_heifer$taxonomy[61] <- "NoAssignedFamily3"
+taxa_heifer$taxonomy[114] <- "NoAssignedFamily4"
+taxa_heifer$taxonomy[134] <- "NoAssignedFamily5"
+taxa_heifer$taxonomy[135] <- "NoAssignedFamily6"
+taxa_heifer$taxonomy[165] <- "NoAssignedFamily7"
+taxa_heifer$taxonomy[183] <- "NoAssignedFamily8"
+taxa_heifer$taxonomy[188] <- "NoAssignedFamily9"
+taxa_heifer$taxonomy[223] <- "NoAssignedFamily10"
+taxa_heifer$taxonomy[228] <- "NoAssignedFamily11"
+taxa_heifer$taxonomy[241] <- "NoAssignedFamily12"
+taxa_heifer$taxonomy[264] <- "NoAssignedFamily13"
+taxa_heifer$taxonomy[265] <- "NoAssignedFamily14"
+taxa_heifer$taxonomy[284] <- "NoAssignedFamily15"
+taxa_heifer$taxonomy[286] <- "NoAssignedFamily16"
+taxa_heifer$taxonomy[289] <- "NoAssignedFamily17"
+taxa_heifer$taxonomy[290] <- "NoAssignedFamily18"
+taxa_heifer$taxonomy[291] <- "NoAssignedFamily19"
+taxa_heifer$taxonomy[306] <- "NoAssignedFamily20"
+taxa_heifer$taxonomy[167] <- "R4_45B"
+#validation set
+taxa_heifer$taxonomy[71] <- "S24_7"
+taxa_heifer$taxonomy[75] <- "p_2534_18B5"
+heifer_test_fam2 <- merge(samples_heifer, taxa_heifer, by="row.names")
+heifer_test_fam3 <- heifer_test_fam2[,-c(1,111,112,113,114)]
+
+write.table(heifer_test_fam3, sep="\t", file="r_inputs/heifer_test_family_final.txt", row.names=F, col.names=T, quote=F)
+
+#steer data
+steer_test_family <- read.table("r_inputs/otu_table_test_steer_L5.txt", sep="\t", header=T)
+samples_steer <- steer_test_family[,-1]
+taxa_steer <- as.data.frame(str_split_fixed(steer_test_family$taxonomy, ";", 5))
+names(taxa_steer)[5] <- "taxonomy"
+taxa_steer$taxonomy <- sub("f__", "", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- sub("\\]", "", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- sub("\\[", "", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- sub("^$", "No Assigned Family", taxa_steer$taxonomy)
+taxa_steer$taxonomy <- sub("Other", "No Assigned Family", taxa_steer$taxonomy)
+taxa_steer$taxonomy[1] <- "NoAssignedFamily1"
+taxa_steer$taxonomy[60] <- "NoAssignedFamily2"
+taxa_steer$taxonomy[61] <- "NoAssignedFamily3"
+taxa_steer$taxonomy[114] <- "NoAssignedFamily4"
+taxa_steer$taxonomy[134] <- "NoAssignedFamily5"
+taxa_steer$taxonomy[135] <- "NoAssignedFamily6"
+taxa_steer$taxonomy[165] <- "NoAssignedFamily7"
+taxa_steer$taxonomy[183] <- "NoAssignedFamily8"
+taxa_steer$taxonomy[188] <- "NoAssignedFamily9"
+taxa_steer$taxonomy[223] <- "NoAssignedFamily10"
+taxa_steer$taxonomy[228] <- "NoAssignedFamily11"
+taxa_steer$taxonomy[241] <- "NoAssignedFamily12"
+taxa_steer$taxonomy[264] <- "NoAssignedFamily13"
+taxa_steer$taxonomy[265] <- "NoAssignedFamily14"
+taxa_steer$taxonomy[284] <- "NoAssignedFamily15"
+taxa_steer$taxonomy[286] <- "NoAssignedFamily16"
+taxa_steer$taxonomy[288] <- "NoAssignedFamily17"
+taxa_steer$taxonomy[290] <- "NoAssignedFamily18"
+taxa_steer$taxonomy[291] <- "NoAssignedFamily19"
+taxa_steer$taxonomy[306] <- "NoAssignedFamily20"
+taxa_steer$taxonomy[71] <- "S24_7"
+taxa_steer$taxonomy[75] <- "p_2534_18B5"
+#validation set
+taxa_steer$taxonomy[167] <- "R4_45B"
+steer_test_fam2 <- merge(samples_steer, taxa_steer, by="row.names")
+steer_test_fam3 <- steer_test_fam2[,-c(1,108,109,110,111)]
+
+write.table(steer_test_fam3, sep="\t", file="r_inputs/steer_test_family_final.txt", row.names=F, col.names=T, quote=F)
+```
+
+## Arcsine square root transformation of test sets at family level for heifer and steer cohorts
+
+```{r}
+#Load packages
+library(dplyr)
+
+#Differential families sets
+differential_fam_heifer <- read.table("differential_otus/heifer_fam_differential.txt", sep="\t", header=F)
+differential_fam_steer <- read.table("differential_otus/steer_fam_differential.txt", sep="\t", header=F)
+
+#heifer data
+heifer_family <- read.table("r_inputs/heifer_test_family_final.txt", sep="\t", header=T, fill=T, stringsAsFactors=F)
+heifer_taxa <- subset(heifer_family, select = c(taxonomy))
+heifer_data <- heifer_family[,-110]
+#arcsine square root transformation
+trans.arcsine <- function(x){asin(sign(x) * sqrt(abs(x)))}
+heifer_data[, 1:109] <- as.data.frame(lapply(heifer_data[, 1:109], FUN = function(x) {sapply(x, FUN = trans.arcsine)}))
+merged_heifer <- merge(heifer_taxa, heifer_data, by = "row.names")
+merged_heifer <- merged_heifer[,-1]
+heifer_filtered <- merged_heifer[which(merged_heifer$taxonomy %in% differential_fam_heifer$V1),]
+heifer_trans <- as.data.frame(t(heifer_filtered), stringsAsFactors=F)
+colnames(heifer_trans) = heifer_trans[1, ]
+heifer_trans = heifer_trans[-1, ]
+heifer_trans_final <- add_rownames(heifer_trans, "SampleID")
+write.table(heifer_trans_final, file="stepwise_reg/heifer_fam_final.txt", sep="\t", col.names=T, row.names=F, quote=F)
+
+#steer data
+steer_family <- read.table("r_inputs/steer_test_family_final.txt", sep="\t", header=T, fill=T, stringsAsFactors=F)
+steer_taxa <- subset(steer_family, select = c(taxonomy))
+steer_data <- steer_family[,-107]
+#arcsine square root transformation
+trans.arcsine <- function(x){asin(sign(x) * sqrt(abs(x)))}
+steer_data[, 1:106] <- as.data.frame(lapply(steer_data[, 1:106], FUN = function(x) {sapply(x, FUN = trans.arcsine)}))
+merged_steer <- merge(steer_taxa, steer_data, by = "row.names")
+merged_steer <- merged_steer[,-1]
+steer_filtered <- merged_steer[which(merged_steer$taxonomy %in% differential_fam_steer$V1),]
+steer_trans <- as.data.frame(t(steer_filtered), stringsAsFactors=F)
+colnames(steer_trans) = steer_trans[1, ]
+steer_trans = steer_trans[-1, ]
+steer_trans_final <- add_rownames(steer_trans, "SampleID")
+write.table(steer_trans_final, file="stepwise_reg/steer_fam_final.txt", sep="\t", col.names=T, row.names=F, quote=F)
+
+#Heifer validation set
+validation_heifer <- merged_steer[which(merged_steer$taxonomy %in% differential_fam_heifer$V1),]
+validation_heifer_trans <- as.data.frame(t(validation_heifer), stringsAsFactors=F)
+colnames(validation_heifer_trans) = validation_heifer_trans[1, ]
+validation_heifer_trans = validation_heifer_trans[-1, ]
+validation_heifer_final <- add_rownames(validation_heifer_trans, "SampleID")
+write.table(validation_heifer_final, file = "stepwise_reg/validation_heifer_fam.txt", sep="\t", col.names=T, row.names=F, quote=F)
+
+#Steer validation set
+validation_steer <- merged_heifer[which(merged_heifer$taxonomy %in% differential_fam_steer$V1),]
+validation_steer_trans <- as.data.frame(t(validation_steer), stringsAsFactors=F)
+colnames(validation_steer_trans) = validation_steer_trans[1, ]
+validation_steer_trans = validation_steer_trans[-1, ]
+validation_steer_final <- add_rownames(validation_steer_trans, "SampleID")
+write.table(validation_steer_final, file = "stepwise_reg/validation_steer_fam.txt", sep="\t", col.names=T, row.names=F, quote=F)
+```
+
+#Forward stepwise regression of taxa-based models at family level for average daily feed intake (ADFI), average daily gain (ADG), feed efficiency (ADG/ADFI) within heifer and steer cohort
+
+```{r}
+#Load packages
+library(car)
+
+#Heifer data 
+mapping_heifer <- read.table("r_inputs/mapping_test_heifer.txt", sep="\t", header=T)
+row.names(mapping_heifer) <- mapping_heifer[,1]
+
+#Heifer linear models for ADFI, ADG, and FE using breed composition as covariates 
+lm_ADFI_heifer <- lm(ADFI ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=mapping_heifer)
+ADFI_res_heifer <- as.data.frame(resid(lm_ADFI_heifer))
+lm_ADG_heifer <- lm(ADG ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=mapping_heifer)
+ADG_res_heifer <- as.data.frame(resid(lm_ADG_heifer))
+lm_FE_heifer <- lm(FE ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=mapping_heifer)
+FE_res_heifer <- as.data.frame(resid(lm_FE_heifer))
+
+#Heifer dataframes
+heifer_fam <- read.table("stepwise_reg/heifer_fam_final.txt", sep = "\t", header=T)
+row.names(heifer_fam) <- heifer_fam[,1]
+heifer_fam <- heifer_fam[,-1]
+heifer_ADFI <- merge(ADFI_res_heifer,heifer_fam,by="row.names")
+heifer_ADFI <- heifer_ADFI[,-1]
+colnames(heifer_ADFI)[1] <- "ADFI"
+heifer_ADG <- merge(ADG_res_heifer,heifer_fam,by="row.names")
+heifer_ADG <- heifer_ADG[,-1]
+colnames(heifer_ADG)[1] <- "ADG"
+heifer_FE <- merge(FE_res_heifer,heifer_fam,by="row.names")
+heifer_FE <- heifer_FE[,-1]
+colnames(heifer_FE)[1] <- "FE"
+
+#Heifer models
+#stepwise regression forward ADFI
+null_heifer_ADFI_fam=lm(ADFI~1, data=heifer_ADFI)
+#summary(null_heifer_ADFI_fam)
+full_heifer_ADFI_fam=lm(ADFI~., data=heifer_ADFI)
+#summary(full_heifer_ADFI_fam)
+step(null_heifer_ADFI_fam, scope=list(lower=null_heifer_ADFI_fam, upper=full_heifer_ADFI_fam), direction="forward")
+
+#Model ADFI
+model_heifer_ADFI_fam <- lm(formula = ADFI ~ NoAssignedFamily18 + Veillonellaceae + Coriobacteriaceae, data=heifer_ADFI)
+summary(model_heifer_ADFI_fam)
+##anova(model_heifer_ADFI_fam)
+#Test multi-collinearity (variance inflation factor)
+vif(model_heifer_ADFI_fam)
+sqrt(vif(model_heifer_ADFI_fam)) > 2
+#Homoscedasticity & Normality
+layout(matrix(c(1,2,3,4),2,2))
+plot(model_heifer_ADFI_fam)
+#Extract observed and predicted values
+OP_heifer_ADFI_fam <- data.frame(Observed = heifer_ADFI$ADFI, Predicted = fitted(model_heifer_ADFI_fam))
+#Plot observed vs prediceted
+par(mfrow=c(1,1))
+plot(OP_heifer_ADFI_fam$Predicted, OP_heifer_ADFI_fam$Observed, xlab="Predicted Average Daily Feed Intake (kg/d)", ylab="Observed Average Daily Feed Intake (kg/d)")
+OP=lm(Observed~Predicted, data=OP_heifer_ADFI_fam)
+#summary(OP)
+abline(OP)
+
+#stepwise regression forward ADG
+null_heifer_ADG_fam=lm(ADG~1, data=heifer_ADG)
+#summary(null_heifer_ADG_fam)
+full_heifer_ADG_fam=lm(ADG~., data=heifer_ADG)
+#summary(full_heifer_ADG_fam)
+step(null_heifer_ADG_fam, scope=list(lower=null_heifer_ADG_fam, upper=full_heifer_ADG_fam), direction="forward")
+
+#Model ADG
+model_heifer_ADG_fam <- lm(formula = ADG ~  Veillonellaceae + Coriobacteriaceae, data=heifer_ADG)
+summary(model_heifer_ADG_fam)
+#anova(model_heifer_ADG_fam)
+#Test multi-collinearity (variance inflation factor)
+vif(model_heifer_ADG_fam)
+sqrt(vif(model_heifer_ADG_fam)) > 2
+#Homoscedasticity & Normality
+layout(matrix(c(1,2,3,4),2,2))
+plot(model_heifer_ADG_fam)
+#Extract observed and predicted values
+OP_heifer_ADG_fam <- data.frame(Observed = heifer_ADG$ADG, Predicted = fitted(model_heifer_ADG_fam))
+#Plot observed vs prediceted
+par(mfrow=c(1,1))
+plot(OP_heifer_ADG_fam$Predicted, OP_heifer_ADG_fam$Observed, xlab="Predicted Average Daily Gain (kg/d)", ylab="Observed Average Daily Gain (kg/d)")
+OP=lm(Observed~Predicted, data=OP_heifer_ADG_fam)
+#summary(OP)
+abline(OP)
+
+#stepwise regression forward FE
+null_heifer_FE_fam=lm(FE~1, data=heifer_FE)
+#summary(null_heifer_FE_fam)
+full_heifer_FE_fam=lm(FE~., data=heifer_FE)
+#summary(full_heifer_FE_fam)
+step(null_heifer_FE_fam, scope=list(lower=null_heifer_FE_fam, upper=full_heifer_FE_fam), direction="forward")
+
+#Model FE
+model_heifer_FE_fam <- lm(formula = FE ~ Veillonellaceae + Coriobacteriaceae + NoAssignedFamily2, data=heifer_FE)
+summary(model_heifer_FE_fam)
+#anova(model_heifer_FE_fam)
+#Test multi-collinearity (variance inflation factor)
+vif(model_heifer_FE_fam)
+sqrt(vif(model_heifer_FE_fam)) > 2
+#Homoscedasticity & Normality
+layout(matrix(c(1,2,3,4),2,2))
+plot(model_heifer_FE_fam)
+#Extract observed and predicted values
+OP_heifer_FE_fam <- data.frame(Observed = heifer_FE$FE, Predicted = fitted(model_heifer_FE_fam))
+#Plot observed vs prediceted
+par(mfrow=c(1,1))
+plot(OP_heifer_FE_fam$Predicted, OP_heifer_FE_fam$Observed, xlab="Predicted Feed Efficiency (ADG/ADFI)", ylab="Observed Feed Efficiency (ADG/ADFI)")
+OP=lm(Observed~Predicted, data=OP_heifer_FE_fam)
+##summary(OP)
+abline(OP)
+
+#Steer data 
+mapping_steer <- read.table("r_inputs/mapping_test_steer.txt", sep="\t", header=T)
+row.names(mapping_steer) <- mapping_steer[,1]
+
+#Steer linear models for ADFI, ADG, and FE using breed composition as covariates 
+lm_ADFI_steer <- lm(ADFI ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=mapping_steer)
+ADFI_res_steer <- as.data.frame(resid(lm_ADFI_steer))
+lm_ADG_steer <- lm(ADG ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=mapping_steer)
+ADG_res_steer <- as.data.frame(resid(lm_ADG_steer))
+lm_FE_steer <- lm(FE ~ perANS +	perHHS + perARS +	perSHS + perBMS + perBRS + perBNS +	perSGS + perBVS +	perCHS + perCAS +	perGVS + perLMS +	perMAS + perSAS + perSMS + perHH + perAN + perSM + perCH + perM2 + perM3 + perRS + perRO, data=mapping_steer)
+FE_res_steer <- as.data.frame(resid(lm_FE_steer))
+
+#steer dataframes
+steer_fam <- read.table("stepwise_reg/steer_fam_final.txt", sep="\t", header=T)
+row.names(steer_fam) <- steer_fam[,1]
+steer_fam <- steer_fam[,-1]
+steer_ADFI <- merge(ADFI_res_steer,steer_fam,by="row.names")
+steer_ADFI <- steer_ADFI[,-1]
+colnames(steer_ADFI)[1] <- "ADFI"
+steer_ADG <- merge(ADG_res_steer,steer_fam,by="row.names")
+steer_ADG <- steer_ADG[,-1]
+colnames(steer_ADG)[1] <- "ADG"
+steer_FE <- merge(FE_res_steer,steer_fam,by="row.names")
+steer_FE <- steer_FE[,-1]
+colnames(steer_FE)[1] <- "FE"
+
+#steer models
+#stepwise regression forward ADFI
+null_steer_ADFI_fam=lm(ADFI~1, data=steer_ADFI)
+#summary(null_steer_ADFI_fam)
+full_steer_ADFI_fam=lm(ADFI~., data=steer_ADFI)
+#summary(full_steer_ADFI_fam)
+step(null_steer_ADFI_fam, scope=list(lower=null_steer_ADFI_fam, upper=full_steer_ADFI_fam), direction="forward")
+
+#Model ADFI
+model_steer_ADFI_fam <- lm(formula = ADFI ~ NoAssignedFamily13 + Paraprevotellaceae + Lachnospiraceae + Coriobacteriaceae + Bifidobacteriaceae + Erysipelotrichaceae, data=steer_ADFI)
+summary(model_steer_ADFI_fam)
+##anova(model_steer_ADFI_fam)
+#Test multi-collinearity (variance inflation factor)
+vif(model_steer_ADFI_fam)
+sqrt(vif(model_steer_ADFI_fam)) > 2
+#Homoscedasticity & Normality
+layout(matrix(c(1,2,3,4),2,2))
+plot(model_steer_ADFI_fam)
+#Extract observed and predicted values
+OP_steer_ADFI_fam <- data.frame(Observed = steer_ADFI$ADFI, Predicted = fitted(model_steer_ADFI_fam))
+#Plot observed vs prediceted
+par(mfrow=c(1,1))
+plot(OP_steer_ADFI_fam$Predicted, OP_steer_ADFI_fam$Observed, xlab="Predicted Average Daily Feed Intake (kg/d)", ylab="Observed Average Daily Feed Intake (kg/d)")
+OP=lm(Observed~Predicted, data=OP_steer_ADFI_fam)
+#summary(OP)
+abline(OP)
+
+#stepwise regression forward ADG
+null_steer_ADG_fam=lm(ADG~1, data=steer_ADG)
+#summary(null_steer_ADG_fam)
+full_steer_ADG_fam=lm(ADG~., data=steer_ADG)
+#summary(full_steer_ADG_fam)
+step(null_steer_ADG_fam, scope=list(lower=null_steer_ADG_fam, upper=full_steer_ADG_fam), direction="forward")
+
+#Model ADG
+model_steer_ADG_fam <- lm(formula = ADG ~ p_2534_18B5 + Lachnospiraceae + Coriobacteriaceae + Bifidobacteriaceae + NoAssignedFamily9, data=steer_ADG)
+summary(model_steer_ADG_fam)
+#anova(model_steer_ADG_fam)
+#Test multi-collinearity (variance inflation factor)
+vif(model_steer_ADG_fam)
+sqrt(vif(model_steer_ADG_fam)) > 2
+#Homoscedasticity & Normality
+layout(matrix(c(1,2,3,4),2,2))
+plot(model_steer_ADG_fam)
+#Extract observed and predicted values
+OP_steer_ADG_fam <- data.frame(Observed = steer_ADG$ADG, Predicted = fitted(model_steer_ADG_fam))
+#Plot observed vs prediceted
+par(mfrow=c(1,1))
+plot(OP_steer_ADG_fam$Predicted, OP_steer_ADG_fam$Observed, xlab="Predicted Average Daily Gain (kg/d)", ylab="Observed Average Daily Gain (kg/d)")
+OP=lm(Observed~Predicted, data=OP_steer_ADG_fam)
+#summary(OP)
+abline(OP)
+
+#stepwise regression forward FE
+null_steer_FE_fam=lm(FE~1, data=steer_FE)
+#summary(null_steer_FE_fam)
+full_steer_FE_fam=lm(FE~., data=steer_FE)
+#summary(full_steer_FE_fam)
+step(null_steer_FE_fam, scope=list(lower=null_steer_FE_fam, upper=full_steer_FE_fam), direction="forward")
+
+#Model FE
+model_steer_FE_fam <- lm(formula = FE ~ NoAssignedFamily13 + Paraprevotellaceae + NoAssignedFamily9, data=steer_FE)
+summary(model_steer_FE_fam)
+#anova(model_steer_FE_fam)
+#Test multi-collinearity (variance inflation factor)
+vif(model_steer_FE_fam)
+sqrt(vif(model_steer_FE_fam)) > 2
+#Homoscedasticity & Normality
+layout(matrix(c(1,2,3,4),2,2))
+plot(model_steer_FE_fam)
+#Extract observed and predicted values
+OP_steer_FE_fam <- data.frame(Observed = steer_FE$FE, Predicted = fitted(model_steer_FE_fam))
+#Plot observed vs prediceted
+par(mfrow=c(1,1))
+plot(OP_steer_FE_fam$Predicted, OP_steer_FE_fam$Observed, xlab="Predicted Feed Efficiency (ADG/ADFI)", ylab="Observed Feed Efficiency (ADG/ADFI)")
+OP=lm(Observed~Predicted, data=OP_steer_FE_fam)
+#summary(OP)
+abline(OP)
+
+#Validation heifer data sets
+validation_fam_heifer <- read.table("stepwise_reg/validation_heifer_fam.txt", sep="\t", header=T)
+row.names(validation_fam_heifer) <- validation_fam_heifer[,1]
+validation_fam_heifer <- validation_fam_heifer[,-1]
+validation_heifer_fam_ADFI <- merge(ADFI_res_steer,validation_fam_heifer,by="row.names")
+validation_heifer_fam_ADFI <- validation_heifer_fam_ADFI[,-1]
+colnames(validation_heifer_fam_ADFI)[1] <- "ADFI"
+validation_heifer_fam_ADG <- merge(ADG_res_steer,validation_fam_heifer,by="row.names")
+validation_heifer_fam_ADG <- validation_heifer_fam_ADG[,-1]
+colnames(validation_heifer_fam_ADG)[1] <- "ADG"
+validation_heifer_fam_FE <- merge(FE_res_steer,validation_fam_heifer,by="row.names")
+validation_heifer_fam_FE <- validation_heifer_fam_FE[,-1]
+colnames(validation_heifer_fam_FE)[1] <- "FE"
+
+#Validation heifer models
+#Heifer ADFI
+modelval_heifer_fam_ADFI <- lm(formula = ADFI ~ NoAssignedFamily18 + Veillonellaceae + Coriobacteriaceae, data=validation_heifer_fam_ADFI)
+summary(modelval_heifer_fam_ADFI)
+
+#Heifer ADG
+modelval_heifer_fam_ADG <- lm(formula = ADG ~ Veillonellaceae + Coriobacteriaceae, data=validation_heifer_fam_ADG)
+summary(modelval_heifer_fam_ADG)
+
+#Heifer FE
+modelval_heifer_fam_FE <- lm(formula = FE ~ Veillonellaceae + Coriobacteriaceae + NoAssignedFamily2, data=validation_heifer_fam_FE)
+summary(modelval_heifer_fam_FE)
+
+#Validation steer data sets
+validation_fam_steer <- read.table("stepwise_reg/validation_steer_fam.txt", sep="\t", header=T)
+row.names(validation_fam_steer) <- validation_fam_steer[,1]
+validation_fam_steer <- validation_fam_steer[,-1]
+validation_steer_fam_ADFI <- merge(ADFI_res_heifer,validation_fam_steer,by="row.names")
+validation_steer_fam_ADFI <- validation_steer_fam_ADFI[,-1]
+colnames(validation_steer_fam_ADFI)[1] <- "ADFI"
+validation_steer_fam_ADG <- merge(ADG_res_heifer,validation_fam_steer,by="row.names")
+validation_steer_fam_ADG <- validation_steer_fam_ADG[,-1]
+colnames(validation_steer_fam_ADG)[1] <- "ADG"
+validation_steer_fam_FE <- merge(FE_res_heifer,validation_fam_steer,by="row.names")
+validation_steer_fam_FE <- validation_steer_fam_FE[,-1]
+colnames(validation_steer_fam_FE)[1] <- "FE"
+
+#Validation steer models
+#steer ADFI
+modelval_steer_fam_ADFI <- lm(formula = ADFI ~ NoAssignedFamily13 + Paraprevotellaceae + Lachnospiraceae + Coriobacteriaceae + Bifidobacteriaceae + Erysipelotrichaceae, data=validation_steer_fam_ADFI)
+summary(modelval_steer_fam_ADFI)
+
+#steer ADG
+modelval_steer_fam_ADG <- lm(formula = ADG ~ p_2534_18B5 + Lachnospiraceae + Coriobacteriaceae + Bifidobacteriaceae + NoAssignedFamily9, data=validation_steer_fam_ADG)
+summary(modelval_steer_fam_ADG)
+
+#steer FE
+modelval_steer_fam_FE <- lm(formula = FE ~ NoAssignedFamily13 + Paraprevotellaceae + NoAssignedFamily9, data=validation_steer_fam_FE)
+summary(modelval_steer_fam_FE)
+```
