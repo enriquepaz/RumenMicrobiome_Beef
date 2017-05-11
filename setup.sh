@@ -3,7 +3,7 @@
 
 # ensure pwd is the cloned repository
 result=${PWD##*/}
-if [ "$result" != "RumenMicrobiome_Beef" ]
+if [ "$result" != "2007_RumenMicrobiome_Beef" ]
 then
 	printf "\nCurrent directory is not the cloned repository.\nSee https://github.com/enriquepaz/RumenMicrobiome_Beef for details.\n\n"
 	exit 1
